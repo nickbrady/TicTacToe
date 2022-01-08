@@ -1,21 +1,8 @@
 import numpy as np
 import random
 import math
+import pandas as pd
 
-theBoard = {'7': ' ' , '8': ' ' , '9': ' ' ,
-            '4': ' ' , '5': ' ' , '6': ' ' ,
-            '1': ' ' , '2': ' ' , '3': ' ' }
-
-def printBoard(board):
-    print(board['7'] + '|' + board['8'] + '|' + board['9'])
-    print('-+-+-')
-    print(board['4'] + '|' + board['5'] + '|' + board['6'])
-    print('-+-+-')
-    print(board['1'] + '|' + board['2'] + '|' + board['3'])
-
-printBoard(theBoard)
-
-# In[1]:
 '''
     There are 9 game over conditions: 8 game won conditions, 1 board full (tie-game)
     x|x|x       | |         | |
@@ -36,182 +23,7 @@ printBoard(theBoard)
     -+-+-      -+-+-
      | |x      x| |
 '''
-
-##############################################################################################################
-def game():
-
-    turn = 'X'
-    count = 0
-    game_over = False
-
-    while not game_over:
-
-        printBoard(theBoard)
-        print("It's your turn," + turn + ".Move to which place?")
-
-        move = input()
-
-        if theBoard[move] == ' ':
-            theBoard[move] = turn
-            count += 1
-        else:
-            print("That place is already filled.\nMove to which place?")
-            continue
-
-        if count >= 5:
-            # check for win conditions
-            game_won = any((
-                            theBoard['7'] == theBoard['8'] == theBoard['9'] != ' ',     # across top row
-                            theBoard['4'] == theBoard['5'] == theBoard['6'] != ' ',     # across middle row
-                            theBoard['1'] == theBoard['2'] == theBoard['3'] != ' ',     # across bottom row
-
-                            theBoard['1'] == theBoard['4'] == theBoard['7'] != ' ',     # down left column
-                            theBoard['2'] == theBoard['5'] == theBoard['8'] != ' ',     # down middle column
-                            theBoard['3'] == theBoard['6'] == theBoard['9'] != ' ',     # down right column
-
-                            theBoard['7'] == theBoard['5'] == theBoard['3'] != ' ',     # diagonal \
-                            theBoard['1'] == theBoard['5'] == theBoard['9'] != ' '      # diagonal /
-                           ))
-
-            if game_won:
-                print('Game Over', '{} Won!'.format(turn))
-                printBoard(theBoard)
-                game_over = True
-                break
-
-            if count == 9:
-                print('Game Over', 'It\'s a tie')
-                printBoard(theBoard)
-                game_over = True
-                break
-
-        # Now we have to change the player after every move.
-        if turn =='X':
-            turn = 'O'
-        else:
-            turn = 'X'
-
-
-##############################################################################################################
-def game_vs_computer():
-
-    count = 0
-    game_over = False
-
-    while not game_over:
-
-        turn = 'X'
-
-        printBoard(theBoard)
-        print("It's your turn," + turn + ".Move to which place?")
-
-        move = input()
-
-        if theBoard[move] == ' ':
-            theBoard[move] = turn
-            count += 1
-        else:
-            print("That place is already filled.\nMove to which place?")
-            continue
-
-        if count >= 5:
-            # check for win conditions
-            game_won = any((
-                            theBoard['7'] == theBoard['8'] == theBoard['9'] != ' ',     # across top row
-                            theBoard['4'] == theBoard['5'] == theBoard['6'] != ' ',     # across middle row
-                            theBoard['1'] == theBoard['2'] == theBoard['3'] != ' ',     # across bottom row
-
-                            theBoard['1'] == theBoard['4'] == theBoard['7'] != ' ',     # down left column
-                            theBoard['2'] == theBoard['5'] == theBoard['8'] != ' ',     # down middle column
-                            theBoard['3'] == theBoard['6'] == theBoard['9'] != ' ',     # down right column
-
-                            theBoard['7'] == theBoard['5'] == theBoard['3'] != ' ',     # diagonal \
-                            theBoard['1'] == theBoard['5'] == theBoard['9'] != ' '      # diagonal /
-                           ))
-
-            if game_won:
-                print('Game Over', '{} Won!'.format(turn))
-                printBoard(theBoard)
-                game_over = True
-                break
-
-            if count == 9:
-                print('Game Over', 'It\'s a tie')
-                printBoard(theBoard)
-                game_over = True
-                break
-
-        # Computer Turn
-        turn = 'O'
-
-        computer_valid_move = False
-        while not computer_valid_move:
-            move = str(random.randint(1, 9))
-            if theBoard[move] == ' ':
-                computer_valid_move = True
-
-        theBoard[move] = turn
-        count += 1
-
-
-##############################################################################################################
-def game_computer_vs_computer():
-
-    turn = 'X'
-    count = 0
-    game_over = False
-
-    while not game_over:
-
-        printBoard(theBoard)
-        print("It's your turn," + turn + ".Move to which place?")
-
-        computer_valid_move = False
-        while not computer_valid_move:
-            move = str(random.randint(1, 9))
-            if theBoard[move] == ' ':
-                computer_valid_move = True
-
-        theBoard[move] = turn
-        count += 1
-
-        if count >= 5:
-            # check for win conditions
-            game_won = any((
-                            theBoard['7'] == theBoard['8'] == theBoard['9'] != ' ',     # across top row
-                            theBoard['4'] == theBoard['5'] == theBoard['6'] != ' ',     # across middle row
-                            theBoard['1'] == theBoard['2'] == theBoard['3'] != ' ',     # across bottom row
-
-                            theBoard['1'] == theBoard['4'] == theBoard['7'] != ' ',     # down left column
-                            theBoard['2'] == theBoard['5'] == theBoard['8'] != ' ',     # down middle column
-                            theBoard['3'] == theBoard['6'] == theBoard['9'] != ' ',     # down right column
-
-                            theBoard['7'] == theBoard['5'] == theBoard['3'] != ' ',     # diagonal \
-                            theBoard['1'] == theBoard['5'] == theBoard['9'] != ' '      # diagonal /
-                           ))
-
-            if game_won:
-                print('Game Over', '{} Won!'.format(turn))
-                printBoard(theBoard)
-                game_over = True
-                break
-
-            if count == 9:
-                print('Game Over', 'It\'s a tie')
-                printBoard(theBoard)
-                game_over = True
-                break
-
-        # Now we have to change the player after every move.
-        if turn =='X':
-            turn = 'O'
-        else:
-            turn = 'X'
-
-# In[10]:
-game_computer_vs_computer()
-
-# In[100]:
+# In[1]:
 
 BOARD_SIZE = 3
 BOARD_DIMENSIONS = (BOARD_SIZE, BOARD_SIZE)
@@ -325,6 +137,8 @@ def get_symbol(cell):
         return 'O'
     return '-'
 
+# In[2]:
+# investigation of the code
 board = Board()
 
 print(board.board_2d)
@@ -405,9 +219,6 @@ print(np.mean(O_win), np.std(O_win))
 
 # In[203]:
 # use game board to check all possible games
-board = Board()
-
-legal_moves_1 = board.get_valid_move_indexes()
 
 board_list = []
 
@@ -417,6 +228,9 @@ seven_move_games = 0
 eight_move_games = 0
 nine_move_wins = 0
 nine_move_ties = 0
+
+board = Board()
+legal_moves_1 = board.get_valid_move_indexes()
 
 for l1 in legal_moves_1:
     board = Board()
@@ -503,3 +317,59 @@ print(seven_move_games)
 print(eight_move_games)
 print(nine_move_wins)
 print(nine_move_ties)
+
+# In[208]:
+# recursive function to build a list of all end of game board orientations (win or draw)
+def board_state_moves_and_play(board_state, board_list=None, number_moves=None, game_result=None):
+    if board_list is None:
+        board_list = []
+
+    if number_moves is None:
+        number_moves = []
+
+    if game_result is None:
+        game_result = []
+
+    if board_state.is_gameover():
+        board_list.append(board_state.board_2d)
+        number_moves.append(np.count_nonzero(board_state.board_2d))
+        game_result.append(board_state.get_game_result())
+
+    else:
+        legal_moves = board_state.get_valid_move_indexes()
+
+        for l_m in legal_moves:
+            board_state_moves_and_play(board_state.play_move(l_m), board_list, number_moves, game_result)
+
+    return board_list, number_moves, game_result
+
+board = Board()
+
+boards, moves, results = board_state_moves_and_play(board)
+
+df = pd.DataFrame()
+
+df['Boards'] = boards
+df['# of Moves'] = moves
+df['Game Results'] = results
+
+# In[500]:
+print('Total Number of End States: \t', len(df))
+
+total_check = 0
+for m in range(5,9):
+    games = np.count_nonzero(df['# of Moves'] == m)
+    total_check += games
+    print('{} Move Games: \t \t \t'.format(m), games)
+
+m = 9
+nine_game_wins = np.count_nonzero((df['# of Moves'] == 9) & (df['Game Results'] == +1))
+nine_game_ties = np.count_nonzero((df['# of Moves'] == 9) & (df['Game Results'] == 0))
+
+total_check += nine_game_wins + nine_game_ties
+
+print('{} Move Games - Wins: \t \t'.format(m), nine_game_wins)
+print('{} Move Games - Ties: \t \t'.format(m), nine_game_ties)
+print(total_check)
+
+# In[600]:
