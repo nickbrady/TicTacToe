@@ -200,17 +200,18 @@ for i in range (number_games):
 
 # In[4]:
 print('\t \t \t (%)')
-print('Ties: \t \t \t', np.count_nonzero(game_results == 0) / len(game_results) * 100)
-print('X Wins: \t \t', np.count_nonzero(game_results == 1) / len(game_results) * 100)
-print('O Wins: \t \t', np.count_nonzero(game_results == -1) / len(game_results) * 100)
+print('Ties: \t \t \t{:.3f}'.format( np.count_nonzero(game_results == 0) / len(game_results) * 100))
+print('X Wins: \t \t{:.3f}'.format( np.count_nonzero(game_results == 1) / len(game_results) * 100))
+print('O Wins: \t \t{:.3f}'.format( np.count_nonzero(game_results == -1) / len(game_results) * 100))
 print()
 
-print('5 Move Games: \t \t', np.count_nonzero(game_moves == 5) / len(game_results) * 100)
-print('6 Move Games: \t \t', np.count_nonzero(game_moves == 6) / len(game_results) * 100)
-print('7 Move Games: \t \t', np.count_nonzero(game_moves == 7) / len(game_results) * 100)
-print('8 Move Games: \t \t', np.count_nonzero(game_moves == 8) / len(game_results) * 100)
-print('9 Move Games (Wins): \t', (np.count_nonzero(game_moves == 9) - np.count_nonzero(game_results == 0)) / len(game_results) * 100)
-print('9 Move Games (Ties): \t', np.count_nonzero(game_results == 0) / len(game_results) * 100)
+print('5 Move Games: \t \t{:.3f}'.format( np.count_nonzero(game_moves == 5) / len(game_results) * 100))
+print('6 Move Games: \t \t{:.3f}'.format( np.count_nonzero(game_moves == 6) / len(game_results) * 100))
+print('7 Move Games: \t \t{:.3f}'.format( np.count_nonzero(game_moves == 7) / len(game_results) * 100))
+print('8 Move Games: \t \t{:.3f}'.format( np.count_nonzero(game_moves == 8) / len(game_results) * 100))
+print('9 Move Games (Wins): \t{:.3f}'.format(
+        (np.count_nonzero(game_moves == 9) - np.count_nonzero(game_results == 0)) / len(game_results) * 100))
+print('9 Move Games (Ties): \t{:.3f}'.format( np.count_nonzero(game_results == 0) / len(game_results) * 100))
 
 # In[5]:
 # Use sampling with replacement to get mean and standard deviations
@@ -230,10 +231,10 @@ X_win = X_win/len(sub_sample)*100
 O_win = O_win/len(sub_sample)*100
 
 # In[6]:
-print('\t \t mean \t \t std. dev')
-print('Ties: \t \t', '{:.3f} \t'.format(np.mean(ties)),  '{:.3f}'.format(np.std(ties)))
-print('X Wins: \t',  '{:.3f} \t'.format(np.mean(X_win)), '{:.3f}'.format(np.std(X_win)))
-print('O Wins: \t',  '{:.3f} \t'.format(np.mean(O_win)), '{:.3f}'.format(np.std(O_win)))
+print('\t \t (mean ± std. dev)')
+print('Ties: \t \t', '{:.3f} ± {:.3f}'.format(np.mean(ties),  np.std(ties)))
+print('X Wins: \t',  '{:.3f} ± {:.3f}'.format(np.mean(X_win), np.std(X_win)))
+print('O Wins: \t',  '{:.3f} ± {:.3f}'.format(np.mean(O_win), np.std(O_win)))
 
 
 # In[7]:
@@ -464,9 +465,9 @@ ax[15].set_ylabel('Overall Losing Positions')
 
 fig.tight_layout()
 
-# In[20]:
+# In[13]:
 '''
-Summary of Results
+Summary of Results (Part 1)
 
 1. The programmed game works as expected
 2. The results of both players choosing random moves are in agreement with the closed form statistics of the possible board orientations
@@ -483,22 +484,31 @@ Summary of Results
         2. 4 of them involve the middle square
         3. each corner square can be used in 3 winning orientations
         4. each middle edge square can only be used in 2 winning orientations
-    c. These results seem to suggest a possible game strategy that can be outlined in 3 lines
+    c. These results seem to possibly suggest a more optimal game strategy than random position selection.
+        The strategy can be summarized in 3 lines:
         1. choose the middle square if available
         2. choose a corner square if available
         3. else choose randomly (all that remain are the middle edge squares)
 '''
 
-# In[21]:
-def tier_strategy(board):
-    # Simple, non-random, tiered square strategy
+# In[20]:
+'''
+    Define different game strategies:
+        a strategy is a function that takes board information as input and returns a move (move_ind)
+'''
+
+def strategy_center_corners_else(board):
+    # optimal game strategy
+    # 1. pick the center square
+    # 2. pick the corner squares
+    # 3. pick whatever else is available
     available_moves = board.get_valid_move_indexes()
     middle_square = 4
     corner_squares = [0, 2, 6, 8]
     avail_corners = [x for x in corner_squares if x in available_moves]
 
-    if 4 in available_moves:
-        move_ind = 4
+    if middle_square in available_moves:
+        move_ind = middle_square
     elif avail_corners:
         move_ind = random.choice(avail_corners)
     else:
@@ -506,46 +516,157 @@ def tier_strategy(board):
 
     return move_ind
 
+def strategy_corners_center_else(board):
+    # 1. pick the corner squares
+    # 2. pick the center square
+    # 3. pick whatever else is available
+    available_moves = board.get_valid_move_indexes()
+    middle_square = 4
+    corner_squares = [0, 2, 6, 8]
+    avail_corners = [x for x in corner_squares if x in available_moves]
+
+    if avail_corners:
+        move_ind = random.choice(avail_corners)
+
+    elif middle_square in available_moves:
+        move_ind = middle_square
+
+    else:
+        move_ind = random.choice(board.get_valid_move_indexes())
+
+    return move_ind
+
+def strategy_midedge_corners_center(board):
+    # 1. pick the edge middle squares (least favorable squares)
+    # 2. pick the corner squares
+    # 3. pick the center square
+    # this is the least optimal strategy - worse than just picking randomly
+    available_moves = board.get_valid_move_indexes()
+    middle_square = 4
+    edge_middle_sq = [1, 3, 5, 7]
+    corner_squares = [0, 2, 6, 8]
+    avail_corners = [x for x in corner_squares if x in available_moves]
+    avail_edge_mid = [x for x in edge_middle_sq if x in available_moves]
+
+    if avail_edge_mid:
+        move_ind = random.choice(avail_edge_mid)
+
+    elif avail_corners:
+        move_ind = random.choice(avail_corners)
+
+    elif middle_square in available_moves:
+        move_ind = middle_square
+
+    return move_ind
+
+# In[21]:
+# define a function to play many games with defined playing strategies
+def play_tic_tac_toe(player_1_strategy=None, player_2_strategy=None, number_of_games=1):
+    game_results = np.zeros(number_of_games)
+    game_moves   = np.zeros(number_of_games)
+
+    def random_move(board):
+        move_ind = random.choice(board.get_valid_move_indexes())
+        return move_ind
+
+    if player_1_strategy is None:
+        player_1_strategy = random_move
+
+    if player_2_strategy is None:
+        player_2_strategy = random_move
+
+    for i in range(number_of_games):
+        board = Board()
+        while not board.is_gameover():
+            if board.get_turn() == 1: # player 1
+                move_ind = player_1_strategy(board)
+            else:                     # player 2
+                move_ind = player_2_strategy(board)
+
+            board = board.play_move(move_ind)
+
+        game_results[i] = board.get_game_result()
+        game_moves[i]   = np.count_nonzero(board.board)
+
+    return game_results, game_moves
+
 # In[22]:
-number_games = 1000
-game_results = np.zeros(number_games)
-game_moves   = np.zeros(number_games)
-for i in range (number_games):
-    board = Board()
-    while not board.is_gameover():
-        if board.get_turn() == 1: # player one
-            move_ind = tier_strategy(board)
-        else:
-            move_ind = random.choice(board.get_valid_move_indexes())
+df_p1 = pd.DataFrame()
 
-        board = board.play_move(move_ind)
+strategy_names = ['Favor_Edge_Middle', 'Random', 'Favor_Corners_Center', 'Favor_Center_Corners']
+strategies = [strategy_midedge_corners_center, None, strategy_corners_center_else,
+                strategy_center_corners_else]
 
-    game_results[i] = board.get_game_result()
-    game_moves[i]   = np.count_nonzero(board.board)
+for strat, strat_name in zip(strategies, strategy_names):
+    # play the games with different strategies
+    game_res, game_moves = play_tic_tac_toe(player_1_strategy=strat, player_2_strategy=None, number_of_games=4000)
+    #
+    # make a list of the game results (+1 = X Wins, -1 = O Wins, 0 = Tie)
+    res_ = [+1, -1, 0]
+    _ = [np.count_nonzero(game_res == r) / len(game_res) for r in res_]
+
+    # add this list to a dataframe
+    df_p1[strat_name] = _
+
+df_p1.index = ['X Wins', 'O Wins', 'Ties']
+
 
 # In[23]:
-print(np.count_nonzero(game_results == 1) / len(game_results))
-print(np.count_nonzero(game_results == 0) / len(game_results))
-print(np.count_nonzero(game_results == -1) / len(game_results))
+df_p2 = pd.DataFrame()
 
+strategy_names = ['Favor_Edge_Middle', 'Random', 'Favor_Corners_Center', 'Favor_Center_Corners']
+strategies = [strategy_midedge_corners_center, None, strategy_corners_center_else,
+                strategy_center_corners_else]
+
+for strat, strat_name in zip(strategies, strategy_names):
+    # play the games with different strategies
+    game_res, game_moves = play_tic_tac_toe(player_1_strategy=None, player_2_strategy=strat, number_of_games=4000)
+    #
+    # make a list of the game results (+1 = X Wins, -1 = O Wins, 0 = Tie)
+    res_ = [+1, -1, 0]
+    _ = [np.count_nonzero(game_res == r) / len(game_res) for r in res_]
+
+    # add this list to a dataframe
+    df_p2[strat_name] = _
+
+df_p2.index = ['X Wins', 'O Wins', 'Ties']
 
 # In[24]:
-number_games = 1000
-game_results = np.zeros(number_games)
-game_moves   = np.zeros(number_games)
-for i in range (number_games):
-    board = Board()
-    while not board.is_gameover():
-        if board.get_turn() == -1: # player two
-            move_ind = tier_strategy(board)
-        else:
-            move_ind = random.choice(board.get_valid_move_indexes())
+ax, fig = axes(fig_number=1, rows=1, columns=2)
 
-        board = board.play_move(move_ind)
+df_p1.plot.bar(ax=ax[1], rot=0)
+df_p2.plot.bar(ax=ax[2], rot=0)
 
-    game_results[i] = board.get_game_result()
-    game_moves[i]   = np.count_nonzero(board.board)
+ax[1].set_ylim(0, 1.0)
+ax[1].set_ylabel('Results Fraction')
+ax[2].set_ylim(0, 1.0)
+ax[2].set_yticklabels([])
 
-print(np.count_nonzero(game_results == -1) / len(game_results))
-print(np.count_nonzero(game_results == 0) / len(game_results))
-print(np.count_nonzero(game_results == 1) / len(game_results))
+ax[1].set_title('Player X Strategy vs Random Player O')
+ax[2].set_title('Player O Strategy vs Random Player X')
+
+fig.tight_layout()
+
+'''
+    Summary of Results (Part 2)
+    The bar graph illustrates the results achieved using different playing strategies vs an opponent who randomly selects their playing positions
+
+    The first plot illustrates different player 1 strategies vs a player 2 who uses a random selection process.
+
+    The results from the mesh plot above showed the most frequently selected positions for won, lost, and tied games. Those results seemed to suggest that the most valuable playing position is the center square, followed by the corner squares, with the edge middle squares being the least valuable. To test this hypothesis various game strategies where created:
+        1. first select edge middle squares, then corner squares, then the center square (worse than random)
+        2. random position selection                                                     (control)
+        3. first select corner squares, then the center square, then edge middle squares (better than random
+                                                                                        but still sub-optimal)
+        4. first select center square, then the corner squares, then edge middle squares (optimal)
+
+    The results illustrated in the bar graph show that the hypotheses about the differing values of the squares are indeed correct.
+    Player 1 peforms worse by preferably selecting the edge middle squares, performs better when preferably selecting corner squares, and performs the best when preferably selecting the center square (followed by the corner squares).
+    The same performance trend exists for Player 2.
+
+    Hypothesis: are more optimal playing strategies better at training a neural-network than sub-optimal playing strategies?
+        For instance, if a neural network is trained against an optimal player, will the neural net learn the optimal playing strategy faster?
+        - proposed answer: probably it will learn faster, but is it useful?
+'''
+
+# In[30]:
