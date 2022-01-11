@@ -69,7 +69,7 @@ class Board:
         if self.illegal_move is not None:
             return RESULT_O_WINS if self.get_turn() == CELL_X else RESULT_X_WINS
 
-        rows_cols_and_diagonals = get_rows_cols_and_diagonals(self.board_2d)
+        rows_cols_and_diagonals = self.get_rows_cols_and_diagonals()
 
         sums = list(map(sum, rows_cols_and_diagonals))
         max_value = max(sums)
@@ -134,22 +134,25 @@ class Board:
 
         return board_as_string
 
-def get_rows_cols_and_diagonals(board_2d):
-    rows_and_diagonal = get_rows_and_diagonal(board_2d)
-    cols_and_antidiagonal = get_rows_and_diagonal(np.rot90(board_2d))
-    return rows_and_diagonal + cols_and_antidiagonal
+    # def get_rows_cols_and_diagonals(board_2d):
+    def get_rows_cols_and_diagonals(self):
+        rows_and_diagonal = get_rows_and_diagonal(self.board_2d)
+        cols_and_antidiagonal = get_rows_and_diagonal(np.rot90(self.board_2d))
+        return rows_and_diagonal + cols_and_antidiagonal
 
-def get_rows_and_diagonal(board_2d):
-    num_rows = board_2d.shape[0]
-    return ([row for row in board_2d[range(num_rows), :]]
-            + [board_2d.diagonal()])
+    @staticmethod
+    def get_rows_and_diagonal(board_2d):
+        num_rows = board_2d.shape[0]
+        return ([row for row in board_2d[range(num_rows), :]]
+                + [board_2d.diagonal()])
 
-def get_symbol(cell):
-    if cell == CELL_X:
-        return 'X'
-    if cell == CELL_O:
-        return 'O'
-    return '-'
+    @staticmethod
+    def get_symbol(cell):
+        if cell == CELL_X:
+            return 'X'
+        if cell == CELL_O:
+            return 'O'
+        return '-'
 
 # In[2]:
 # investigation of the code and game function
@@ -161,8 +164,9 @@ print(board.get_valid_move_indexes())
 print('Game Result', board.get_game_result())
 print(board.is_gameover())
 
-print(get_rows_and_diagonal(board.board_2d))
-print(get_rows_and_diagonal(np.rot90(board.board_2d)))
+print(board.get_rows_cols_and_diagonals())
+print(board.get_rows_and_diagonal(board.board_2d))
+print(board.get_rows_and_diagonal(np.rot90(board.board_2d)))
 
 board = board.play_move(3)
 board = board.play_move(4)
@@ -350,7 +354,7 @@ Agenda
         Plot the most frequent win positions
 '''
 
-ax, fig = axes(rows=8, columns=2)
+ax, fig = axes(rows=8, columns=2, row_height=3, column_width=6*3./5)
 
 games_to_move_k = math.factorial(9)/math.factorial(9-5)
 advance_percent = 1
@@ -564,6 +568,8 @@ def strategy_midedge_corners_center(board):
 def play_tic_tac_toe(player_1_strategy=None, player_2_strategy=None, number_of_games=1):
     game_results = np.zeros(number_of_games)
     game_moves   = np.zeros(number_of_games)
+    # game_moves   = np.zeros(9)
+    # game_moves_list = []
 
     def random_move(board):
         move_ind = random.choice(board.get_valid_move_indexes())
@@ -587,6 +593,7 @@ def play_tic_tac_toe(player_1_strategy=None, player_2_strategy=None, number_of_g
 
         game_results[i] = board.get_game_result()
         game_moves[i]   = np.count_nonzero(board.board)
+        # game_moves_list.append(game_moves)
 
     return game_results, game_moves
 
@@ -670,3 +677,203 @@ fig.tight_layout()
 '''
 
 # In[30]:
+''' Write a Min/Max game strategy '''
+
+def choose_min_or_max_for_comparison(board):
+    # returns function min() or function max() depending on whose turn it is
+    turn = board.get_turn()
+    return min if turn == CELL_O else max
+
+# recursive functions calculate_position_value, get_position_value used to evaluate the value of each subsequent move
+def calculate_position_value(board):
+    # board is a class object
+    if board.is_gameover():
+        return board.get_game_result()
+
+    valid_move_indexes = board.get_valid_move_indexes()
+
+    values = [get_position_value(board.play_move(m))
+              for m in valid_move_indexes]
+
+    min_or_max = choose_min_or_max_for_comparison(board)
+    position_value = min_or_max(values)
+
+    return position_value
+
+def get_position_value(board):
+    # cached_position_value, found = get_position_value_from_cache(board)
+    # if found:
+    #     return cached_position_value
+
+    position_value = calculate_position_value(board)
+
+    # put_position_value_in_cache(board, position_value)
+
+    return position_value
+
+def get_move_value_pairs(board):
+    valid_move_indexes = board.get_valid_move_indexes()
+
+    # assertion error if valid_move_indexes is empty
+    assert valid_move_indexes, "never call with an end-position"
+
+    # (index, value)
+    move_value_pairs = [(m, get_position_value(board.play_move(m)))
+                        for m in valid_move_indexes]
+
+    return move_value_pairs
+
+def mini_max_strategy(board): # mini_max_strategy
+    min_or_max = choose_min_or_max_for_comparison(board)
+    move_value_pairs = get_move_value_pairs(board)
+    move, best_value = min_or_max(move_value_pairs, key=lambda m_v_p: m_v_p[1])
+
+    best_move_value_pairs = [m_v_p for m_v_p in move_value_pairs if m_v_p[1] == best_value]
+    chosen_move, _ = random.choice(best_move_value_pairs)
+
+    return chosen_move
+
+def mini_max_strategy_pref_center(board):
+    center_square = 4
+    if center_square in board.get_valid_move_indexes():
+        return center_square
+
+    return mini_max_strategy(board)
+
+
+
+
+board = Board()
+board = board.play_move(1)
+# board = board.play_move(2)
+# board = board.play_move(5)
+# board = board.play_move(6)
+print(board.board_2d)
+
+print(mini_max_strategy(board))
+print(mini_max_strategy_pref_center(board))
+
+# In[6]:
+
+def get_symmetrical_board_orientations(board_2d):
+    orientations = [board_2d]
+
+    current_board_2d = board_2d
+    for i in range(3): # rotate board 3 times by 90 degrees
+        current_board_2d = np.rot90(current_board_2d)
+        orientations.append(current_board_2d)
+
+    orientations.append(np.flipud(board_2d))
+    orientations.append(np.fliplr(board_2d))
+
+    orientations.append(np.flipud(np.rot90(board_2d)))
+    orientations.append(np.fliplr(np.rot90(board_2d)))
+
+    # there are 8 equivalent board orientations
+    return orientations
+
+
+class BoardCache:
+    # cache is a dictionary, with keys "board.board_2d.tobytes()"
+    # and value: board_val - which is the best possible outcome if both players play optimally
+    def __init__(self):
+        self.cache = {}
+
+    def set_for_position(self, board, board_val):
+        self.cache[board.board_2d.tobytes()] = board_val
+
+    def get_for_position(self, board):
+        board_2d = board.board_2d
+
+        orientations = get_symmetrical_board_orientations(board_2d)
+
+        for b, t in orientations:
+            result = self.cache.get(b.tobytes())
+            if result is not None:
+                return (result, t), True
+
+        return None, False
+
+    def reset(self):
+        self.cache = {}
+
+cache = BoardCache()
+
+
+# In[5]:
+'''
+    From the board position, we can see that placing an X (1) in the center is the best possible move because it prevents O from going there (and winning). In addition, and X in the center gives two paths to victory and O cannot block both in one turn
+
+    board:
+    [[ 0  1 -1]
+     [ 0  0  1]
+     [-1  0  0]]
+
+    [(0, -1), (3, -1), (4, 1), (7, -1), (8, -1)]
+
+    Unsatisfactory minimax strategy: (does not pick center or corner square when available)
+    [[ 0  0  0]
+     [ 1  0  0]
+     [ 0  0  0]]
+    [[ 0  0  0]
+     [ 1  0  0]
+     [-1  0  0]]
+    [[ 0  0  1]
+     [ 1  0  0]
+     [-1  0  0]]
+    [[ 0  0  1]
+     [ 1  0  0]
+     [-1  0 -1]]
+    [[ 0  0  1]
+     [ 1  0  0]
+     [-1  1 -1]]
+    [[ 0 -1  1]
+     [ 1  0  0]
+     [-1  1 -1]]
+    [[ 0 -1  1]
+     [ 1  0  1]
+     [-1  1 -1]]
+    [[-1 -1  1]
+     [ 1  0  1]
+     [-1  1 -1]]
+    [[-1 -1  1]
+     [ 1  1  1]
+     [-1  1 -1]]
+    (array([1.]), array([9.]))
+'''
+def play_tic_tac_toe(player_1_strategy=None, player_2_strategy=None, number_of_games=1):
+    game_results = np.zeros(number_of_games)
+    game_moves_list = []
+
+    def random_move(board):
+        move_ind = random.choice(board.get_valid_move_indexes())
+        return move_ind
+
+    if player_1_strategy is None:
+        player_1_strategy = random_move
+
+    if player_2_strategy is None:
+        player_2_strategy = random_move
+
+    for i in range(number_of_games):
+        board = Board()
+        move_count = 0
+        game_moves = np.zeros(9)        # move history
+        while not board.is_gameover():
+            if board.get_turn() == 1: # player 1
+                move_ind = player_1_strategy(board)
+            else:                     # player 2
+                move_ind = player_2_strategy(board)
+
+            board = board.play_move(move_ind)
+            game_moves[move_count] = move_ind+1     # if zero index is possible hard to tell how many zeros
+            move_count += 1
+
+        game_results[i] = board.get_game_result()
+        game_moves_list.append(game_moves)
+
+    print(game_moves_list)
+    return game_results, game_moves_list
+
+
+play_tic_tac_toe(player_1_strategy=mini_max_strategy, player_2_strategy=None, number_of_games=2)
