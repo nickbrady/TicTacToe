@@ -16,6 +16,7 @@ matplotlib.rc('axes', edgecolor='k')
 
 import random
 import math
+import itertools
 
 '''
     There are 9 game over conditions: 8 game won conditions, 1 board full (tie-game)
@@ -112,9 +113,6 @@ class Board:
         return ([i for i in range(self.board.size)
                 if self.board[i] != CELL_EMPTY])
 
-    # def get_random_valid_move_index(self):                    # don't really want this; prefer play
-    #     return random.choice(self.get_valid_move_indexes())   # strategies to be done outside of board
-
     def print_board(self):
         print(self.get_board_as_string())
 
@@ -123,7 +121,7 @@ class Board:
         board_as_string = "-------\n"
         for r in range(rows):
             for c in range(cols):
-                move = get_symbol(self.board_2d[r, c])
+                move = self.get_symbol(self.board_2d[r, c])
                 if c == 0:
                     board_as_string += f"|{move}|"
                 elif c == 1:
@@ -136,8 +134,8 @@ class Board:
 
     # def get_rows_cols_and_diagonals(board_2d):
     def get_rows_cols_and_diagonals(self):
-        rows_and_diagonal = get_rows_and_diagonal(self.board_2d)
-        cols_and_antidiagonal = get_rows_and_diagonal(np.rot90(self.board_2d))
+        rows_and_diagonal = self.get_rows_and_diagonal(self.board_2d)
+        cols_and_antidiagonal = self.get_rows_and_diagonal(np.rot90(self.board_2d))
         return rows_and_diagonal + cols_and_antidiagonal
 
     @staticmethod
@@ -872,8 +870,223 @@ def play_tic_tac_toe(player_1_strategy=None, player_2_strategy=None, number_of_g
         game_results[i] = board.get_game_result()
         game_moves_list.append(game_moves)
 
-    print(game_moves_list)
+    # print(game_moves_list)
     return game_results, game_moves_list
 
 
 play_tic_tac_toe(player_1_strategy=mini_max_strategy, player_2_strategy=None, number_of_games=2)
+
+
+# In[100]:
+''' Min/Max game strategy '''
+class Transform:
+    def __init__(self, *operations):
+        self.operations = operations
+
+    def transform(self, target):
+        for op in self.operations:
+            target = op.transform(target)
+        return target
+
+    def reverse(self, target):
+        for op in reverse(self.operations):
+            target = op.reverse(target)
+        return target
+
+
+class Identity:
+    @staticmethod
+    def transform(matrix2d):
+        return matrix2d
+
+    @staticmethod
+    def reverse(matrix2d):
+        return matrix2d
+
+
+class Rotate90:
+    def __init__(self, number_of_rotations):
+        self.number_of_rotations = number_of_rotations
+        self.op = np.rot90
+
+    def transform(self, matrix2d):
+        return self.op(matrix2d, self.number_of_rotations)
+
+    def reverse(self, transformed_matrix2d):
+        return self.op(transformed_matrix2d, -self.number_of_rotations)
+
+
+class Flip:
+    def __init__(self, op):
+        self.op = op
+
+    def transform(self, matrix2d):
+        return self.op(matrix2d)
+
+    def reverse(self, transformed_matrix2d):
+        return self.transform(transformed_matrix2d)
+
+
+# used to get back the original board ?
+def reverse(items):
+    return items[::-1]
+
+
+
+TRANSFORMATIONS = [ Identity(),
+                    Rotate90(1),
+                    Rotate90(2),
+                    Rotate90(3),
+                    Flip(np.flipud),
+                    Flip(np.fliplr),
+                    Transform(Rotate90(1), Flip(np.flipud)),
+                    Transform(Rotate90(1), Flip(np.fliplr))]
+
+class BoardCache:
+
+    def __init__(self):
+        self.cache = {} # initialize a dictionary, key=board_2d.tobytes(),
+                        #                          value= board position value (1, 0, -1)
+
+    def get_for_position(self, board):
+        board_orientations = self.get_symmetrical_board_orientations(board.board_2d)
+
+        # boolean list of which board orientations are in the cache
+        _ = [b_[0].tobytes() in self.cache for b_ in board_orientations]
+
+        # if not in cache - return False
+        if not any(_):
+            return None, False
+
+        # else
+        board_orientations = list(itertools.compress(board_orientations, _))
+        board_value = self.cache[board_orientations[0][0].tobytes()]
+
+        return board_value, True
+
+    def set_for_position(self, board, position_value):
+        self.cache[board.board_2d.tobytes()] = position_value
+
+    def get_symmetrical_board_orientations(self, board_2d):
+        return [(t.transform(board_2d), t) for t in TRANSFORMATIONS]
+
+    def reset(self):
+        self.cache = {}
+
+def get_position_value(board):
+    # check if the board position is already cached
+    cached_position_value, found = cache.get_for_position(board)
+    if found:
+        return cached_position_value
+
+    position_value = calculate_position_value(board)
+
+    # cache the board position (if it isn't already cached)
+    cache.set_for_position(board, position_value)
+
+    return position_value
+
+def calculate_position_value(board):
+    # board is a class object
+    if board.is_gameover():
+        return board.get_game_result()
+
+    valid_move_indexes = board.get_valid_move_indexes()
+
+    values = [get_position_value(board.play_move(m))
+              for m in valid_move_indexes]
+
+    min_or_max = choose_min_or_max_for_comparison(board)
+    position_value = min_or_max(values)
+
+    return position_value
+
+
+def choose_min_or_max_for_comparison(board):
+    # returns function min() or function max() depending on whose turn it is
+    turn = board.get_turn()
+    return min if turn == CELL_O else max
+
+def get_move_value_pairs(board):
+    valid_move_indexes = board.get_valid_move_indexes()
+
+    # assertion error if valid_move_indexes is empty
+    assert valid_move_indexes, "never call with an end-position"
+
+    # (index, value)
+    move_value_pairs = [(m, get_position_value(board.play_move(m)))
+                        for m in valid_move_indexes]
+
+    return move_value_pairs
+
+def mini_max_strategy(board): # mini_max_strategy
+    min_or_max = choose_min_or_max_for_comparison(board)
+    move_value_pairs = get_move_value_pairs(board)
+    move, best_value = min_or_max(move_value_pairs, key=lambda m_v_p: m_v_p[1])
+
+    best_move_value_pairs = [m_v_p for m_v_p in move_value_pairs if m_v_p[1] == best_value]
+    chosen_move, _ = random.choice(best_move_value_pairs)
+
+    return chosen_move
+
+def mini_max_strategy_pref_center(board):
+    center_square = 4
+    if center_square in board.get_valid_move_indexes():
+        return center_square
+
+    return mini_max_strategy(board)
+
+def mini_max_strategy_center_corners(board): # mini_max_strategy
+    center_square = 4
+    if center_square in board.get_valid_move_indexes():
+        return center_square
+
+    min_or_max = choose_min_or_max_for_comparison(board)
+    move_value_pairs = get_move_value_pairs(board)
+    move, best_value = min_or_max(move_value_pairs, key=lambda m_v_p: m_v_p[1])
+
+    best_move_value_pairs = [m_v_p for m_v_p in move_value_pairs if m_v_p[1] == best_value]
+
+    # choose preferentially corner squares
+    corners = [0, 2, 6, 8]
+    available_corners = [b[0] for b in best_move_value_pairs if b[0] in corners]
+    if available_corners:
+        return random.choice(available_corners)
+
+    chosen_move, _ = random.choice(best_move_value_pairs)
+
+    return chosen_move
+
+# In[99]:
+cache = BoardCache()
+
+# In[100]:
+game_results, game_moves = play_tic_tac_toe(player_1_strategy=mini_max_strategy, player_2_strategy=None, number_of_games=10000)
+
+# In[101]:
+print(np.count_nonzero(game_results == 1) / len(game_results))
+
+# In[200]:
+game_results, game_moves = play_tic_tac_toe(player_1_strategy=mini_max_strategy_pref_center, player_2_strategy=None, number_of_games=10000)
+
+# In[201]:
+print(np.count_nonzero(game_results == 1) / len(game_results))
+
+# In[100]:
+game_results, game_moves = play_tic_tac_toe(player_1_strategy=None, player_2_strategy=mini_max_strategy, number_of_games=10000)
+
+# In[101]:
+print(np.count_nonzero(game_results == -1) / len(game_results))
+
+# In[200]:
+game_results, game_moves = play_tic_tac_toe(player_1_strategy=None, player_2_strategy=mini_max_strategy_pref_center, number_of_games=10000)
+
+# In[201]:
+print(np.count_nonzero(game_results == -1) / len(game_results))
+
+# In[400]:
+game_results, game_moves = play_tic_tac_toe(player_1_strategy=mini_max_strategy_pref_center, player_2_strategy=mini_max_strategy, number_of_games=100)
+
+# In[401]:
+print(game_results)
+print(np.count_nonzero(game_results == 0) / len(game_results))
