@@ -70,3 +70,7 @@ https://github.com/nestedsoftware/tictac/blob/220bbdc6103ff012ec60b5b424e1566205
 
 Tic-Tac-Toe Math:
 http://www.se16.info/hgb/tictactoe.htm
+
+## Summary of Results
+The source code for analyzing and visualizing the results from different game strategies can be found in ```GameAnalysis.py```
+
