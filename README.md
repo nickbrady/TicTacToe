@@ -101,7 +101,7 @@ Unsurprisingly, these results are identical to the results obtained from www.se1
 
 1. 9! / (9-5)! = 15120 is the number of game states after the 5th move
 2. 1440 game states are won on move 5 and therefore *DO NOT* proceed to the sixth move
-3. There are therefore (9! / (9-5)! - 1440) * 4 game states after the 6th move
+3. There are therefore (9! / (9-5)! - 1440) * (9-5) game states after the 6th move
 4. 5328 games states are won on move 6
 5. ((9! / (9-5)! - 1440) * (9-5) - 5328) * (9-6) = game states after the 7th move
 6. (((9! / (9-5)! - 1440) * (9-5) - 5328) * (9-6) - 47952) * (9-7) = game states after 8th move
