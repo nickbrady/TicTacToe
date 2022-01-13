@@ -25,15 +25,38 @@ board = board.play_move(1)
 
 Get a 2D display of the board
 ```
-print(board.board_2d)
+board.board_2d
 ```
 
-Get a list of the indices already occupied (illegal_move)
-And a list of the valid moves
+Get a list of the indices already occupied (illegal_move) and a list of the valid moves
 ```
-print(board.illegal_move)
-print(board.get_valid_move_indexes())
+board.illegal_move
+board.get_valid_move_indexes()
 ```
 
+Play a winning game
+```
+board = Board()
+board = board.play_move(3)
+board = board.play_move(4)
+board = board.play_move(1)
+board = board.play_move(2)
+board = board.play_move(5)
+board = board.play_move(6)
+```
 
+Visualize the board:
+```
+board.board_2d
+board.print_board()
+```
 
+Is the game over?
+```
+board.is_gameover()
+```
+
+Who won?
+```
+board.get_game_result()
+```
