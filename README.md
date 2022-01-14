@@ -74,6 +74,7 @@ http://www.se16.info/hgb/tictactoe.htm
 ## Summary of Results
 The source code for analyzing and visualizing the results from different game strategies can be found in ```GameAnalysis.py```
 
+### Random Move Choice
 Using ```play_tic_tac_toe``` a high number of random games (each player chooses moves random from a list of possible moves) can be played. From these games statistics can be generated to get a break down of the results. 
 
 |              | (mean ± std. dev) |
@@ -122,6 +123,15 @@ From this image we can deduce that the middle square is played frequently by the
 Varying game strategies can be created to test this hypothesis about the relative values of each square (center > corners > edge middle). 
 ![RandomStrategies](VaryingStrategyResults.png)
 The results displayed above seem to corroborate our hypotheis about the relative values of each position. Strategies that favor taking the edge middle positions perform the worst, while strategies that favor the center position perform the best. This seems to hold whether playing first or playing second.
+
+### MiniMax Strategy
+
+|                           |              Random 2 |      Minimax 2      |   Minimax: Center 2 | Minimax: Center > Corners |        
+|---------------------------|----------------------:|--------------------:|--------------------:|--------------------------:|
+| Random 1                  | [0.583, 0.298, 0.119] | [0.0, 0.769, 0.231] | [0.0, 0.852, 0.148] |       [0.0, 0.821, 0.179] |
+| Minimax 1                 |   [0.972, 0.0, 0.028] |     [0.0, 0.0, 1.0]	|     [0.0, 0.0, 1.0]	|           [0.0, 0.0, 1.0] |
+| Minimax: Center 1         |   [0.985, 0.0, 0.015] |     [0.0, 0.0, 1.0]	|     [0.0, 0.0, 1.0]	|           [0.0, 0.0, 1.0] |
+| Minimax: Center > Corners |   [0.975, 0.0, 0.025] |     [0.0, 0.0, 1.0]	|     [0.0, 0.0, 1.0]	|           [0.0, 0.0, 1.0] |
 
 Player 1:
 [[ 1  0 -1]
