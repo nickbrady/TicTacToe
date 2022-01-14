@@ -116,12 +116,12 @@ The percentage of games that are won after each nth move can then calculated.
 | Estimaged    |  9.484 ± 0.913 |  8.677 ± 0.899 | 26.583 ± 1.412 | 20.223 ± 1.283 | 21.296 ± 1.318 | 13.739 ± 1.097 | 57.362 ± 1.525 | 28.899 ± 1.431|
 
 Using the analytical results we can visualize the positions that are most frequently played for wins, losses, ties.
-![Images/PlayFrequency](Tic-Tac-Toe_PlayFrequency.png)
+![PlayFrequency](Images/Tic-Tac-Toe_PlayFrequency.png)
 
 From this image we can deduce that the middle square is played frequently by the winner and played infrequently by the loser - i.e. the middle square is likely the most valuable square. This makes sense from our intuition as well because of the 8 possible winning orientations, 4 of them (50%) involve the middle square. The results also indicate that the corner squares are the second most valuable places (each corner square is involved in 3 winning orientations), where the edge middle squares are the least valuable (each only involved in 2 winning orientations). 
 
 Varying game strategies can be created to test this hypothesis about the relative values of each square (center > corners > edge middle). 
-![Images/RandomStrategies](VaryingStrategyResults.png)
+![RandomStrategies](Images/VaryingStrategyResults.png)
 The results displayed above seem to corroborate our hypotheis about the relative values of each position. Strategies that favor taking the edge middle positions perform the worst, while strategies that favor the center position perform the best. This seems to hold whether playing first or playing second.
 
 ### MiniMax Strategy
