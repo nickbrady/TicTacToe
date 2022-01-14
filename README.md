@@ -122,3 +122,18 @@ From this image we can deduce that the middle square is played frequently by the
 Varying game strategies can be created to test this hypothesis about the relative values of each square (center > corners > edge middle). 
 ![RandomStrategies](VaryingStrategyResults.png)
 The results displayed above seem to corroborate our hypotheis about the relative values of each position. Strategies that favor taking the edge middle positions perform the worst, while strategies that favor the center position perform the best. This seems to hold whether playing first or playing second.
+
+Player 1:
+[[ 1  0 -1]
+ [-1  1  1]
+ [ 0  0 -1]]
+When in this situation, playing a the corner square commits to a tie, while playing one of the middle edge corners still leaves open the possibility for a win. This is why using the minimax strategy that prefers corners over middle edge squares performs slightly worse than a minimax strategy that only has a preference the center square.
+This conclusion is qualitative and was drawn from investigating several games of different minimax strategies vs a random player.
+ 
+ Player two:
+ [[ 1  0  0]
+ [ 0 -1  0]
+ [ 0  1  0]]
+ In this situation, playing bottom left or top right are reasonable moves, but on the chance that player 1 blocks those moves, player 2 is forced to play a defensive move to block a player 1 win. This is not good because defensive moves are wasted moves and decreases one's chance of winning. A better strategy, especially against a random play is to play the left middle edge square, then a block by player 1 does not set up a forced move by player 2 - this leaves more chances for player 2 to play offensively (increasing the chance for winning). Again, this conclusion is only qualitative, but logical. It is interesting to see this because in this situation there is only one "best" move. Perhaps the strategy can be surmised as:
+ 1. Don't lose (block opponent when necessary)
+ 2. Play a move to threaten a win: make a two in a row and force opponent to block, **BUT** don't set yourself up that your opponent's blocking move, forces you to make a defensive move - again defensive moves are wasted moves because they significantly decrease one's chance of winning (stay on offense).
