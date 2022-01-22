@@ -131,7 +131,8 @@ MAX_EPISODES = 2000
 
 q_table = build_q_table(N_STATES, ACTIONS)
 
-step_results = []
+left_qtable, right_qtable = [np.zeros((MAX_EPISODES, N_STATES)), np.zeros((MAX_EPISODES, N_STATES))]
+
 for episode in range(MAX_EPISODES):
     step_counter = 0
     S = 0
@@ -154,60 +155,41 @@ for episode in range(MAX_EPISODES):
         update_env(S, episode, step_counter+1)
         step_counter += 1
 
-    step_results.append(step_counter - 5)
-    # display(q_table)
-display(q_table)
-
-# In[5]:
-plt.semilogy(step_results[:100])
-
+    left_qtable[episode, :] = q_table['left'].values
+    right_qtable[episode, :] = q_table['right'].values
 
 # In[2]:
+ax, fig = axes(rows = 1, columns=2)
 
-MAX_EPISODES = 1000
+colors = ['b', 'g', 'r', 'purple', 'k']
 
-q_table_target_training = build_q_table(N_STATES, ACTIONS)
-q_table_target = copy(q_table_target_updated)
+for state in range(5):
+    ax[1].plot(left_qtable[:,state], 'o', color=colors[state])
+    ax[2].plot(right_qtable[:,state], 'o', color=colors[state])
 
-for episode in range(MAX_EPISODES+1):
-    step_counter = 0
-    S = 0
-    is_terminated = False
-    update_env(S, episode, step_counter)
-    while not is_terminated:
+ax[1].set_ylim(ax[2].get_ylim())
+ax[2].set_xlim(-5, 205)
+ax[1].set_xlim(-25, 1025)
 
-        A = choose_action(S, q_table_target)
-        S_, R = get_env_feedback(S, A)  # take action & get next state and reward
-        q_predict = q_table_target_training.loc[S, A]
-        # only update the target_update qtable
-        if S_ != 'terminal':
-            q_target = R + GAMMA * q_table_target_training.iloc[S_, :].max()   # next state is not terminal
-        else:
-            q_target = R     # next state is terminal
-            is_terminated = True    # terminate this episode
+fig.text(x=0.5, y=0.99, s='Q Table Values', ha = 'center', fontsize=20, fontweight='bold')
+ax[1].set_title('Left')
+ax[2].set_title('Right')
 
-        q_table_target_training.loc[S, A] += ALPHA * (q_target - q_predict)  # update
-        S = S_  # move to next state
+fig.tight_layout()
 
-
-        update_env(S, episode, step_counter+1)
-        step_counter += 1
-
-    if episode % 100 == 0:
-        display(q_table_target)
-        q_table_target = copy(q_table_target_training)
-        print()
 
 # In[3]:
 ''' Double Q-Learning '''
 
-MAX_EPISODES = 4000
+MAX_EPISODES = 2000
 
 q_table_A = build_q_table(N_STATES, ACTIONS)
 q_table_B = copy(q_table_A)
 
+left_qtable_A, right_qtable_A = [np.zeros((MAX_EPISODES, N_STATES)), np.zeros((MAX_EPISODES, N_STATES))]
+left_qtable_B, right_qtable_B = [np.zeros((MAX_EPISODES, N_STATES)), np.zeros((MAX_EPISODES, N_STATES))]
 
-for episode in range(MAX_EPISODES+1):
+for episode in range(MAX_EPISODES):
     step_counter = 0
     S = 0
     is_terminated = False
@@ -251,7 +233,37 @@ for episode in range(MAX_EPISODES+1):
         update_env(S, episode, step_counter+1)
         step_counter += 1
 
-    # if episode % 10 == 0:
-display(q_table_A)
-display(q_table_B)
-print()
+    left_qtable_A[episode, :]  = q_table_A['left'].values
+    right_qtable_A[episode, :] = q_table_A['right'].values
+    left_qtable_B[episode, :]  = q_table_B['left'].values
+    right_qtable_B[episode, :] = q_table_B['right'].values
+
+# In[4]:
+
+ax, fig = axes(rows = 2, columns=2)
+
+for state in range(5):
+    ax[1].plot(left_qtable_A[:,state], 'o', color=colors[state])
+    ax[2].plot(right_qtable_A[:,state], 'o', color=colors[state])
+
+    ax[3].plot(left_qtable_B[:,state], 'o', color=colors[state])
+    ax[4].plot(right_qtable_B[:,state], 'o', color=colors[state])
+
+ax[1].set_ylim(ax[2].get_ylim())
+ax[2].set_xlim(-10, 250)
+ax[1].set_xlim(-50, 2050)
+ax[4].set_xlim(-10, 250)
+ax[3].set_xlim(-50, 2050)
+
+ax[1].set_ylim(ax[2].get_ylim())
+ax[3].set_ylim(ax[4].get_ylim())
+
+fig.text(x=0.5, y=0.97, s='Q Table A', ha = 'center', fontsize=20, fontweight='bold')
+ax[1].set_title('Left')
+ax[2].set_title('Right')
+
+fig.text(x=0.5, y=0.48, s='Q Table B', ha = 'center', fontsize=20, fontweight='bold')
+ax[3].set_title('Left')
+ax[4].set_title('Right')
+
+fig.tight_layout()
