@@ -175,6 +175,10 @@ fig.text(x=0.5, y=0.99, s='Q Table Values', ha = 'center', fontsize=20, fontweig
 ax[1].set_title('Left')
 ax[2].set_title('Right')
 
+ax[1].set_ylabel('Value')
+ax[1].set_xlabel('Training Episode')
+ax[2].set_xlabel('Training Episode')
+
 fig.tight_layout()
 
 
@@ -262,8 +266,13 @@ fig.text(x=0.5, y=0.97, s='Q Table A', ha = 'center', fontsize=20, fontweight='b
 ax[1].set_title('Left')
 ax[2].set_title('Right')
 
-fig.text(x=0.5, y=0.48, s='Q Table B', ha = 'center', fontsize=20, fontweight='bold')
+fig.text(x=0.5, y=0.49, s='Q Table B', ha = 'center', fontsize=20, fontweight='bold')
 ax[3].set_title('Left')
 ax[4].set_title('Right')
+
+ax[1].set_ylabel('Value')
+ax[3].set_ylabel('Value')
+ax[3].set_xlabel('Training Episode')
+ax[4].set_xlabel('Training Episode')
 
 fig.tight_layout()
