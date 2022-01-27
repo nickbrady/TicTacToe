@@ -149,3 +149,7 @@ This conclusion is qualitative and was drawn from investigating several games of
  2. Play a move to threaten a win: make a two in a row and force opponent to block, **BUT** don't set yourself up that your opponent's blocking move, forces you to make a defensive move - again defensive moves are wasted moves because they significantly decrease one's chance of winning (stay on offense).
 
 ### Tabular-Q Strategy
+
+
+Hypothesis: when training the Q-Table against a mini-max player the maximum value for any move should be <0, because playing against a minimax player will at best produce a tie.
+But when trained against a random player, some of the values can be greater than 0, because a random player will leave open the chance for winning. 
