@@ -127,7 +127,7 @@ if __name__ == "__main__":
 
 
 # In[1]:
-MAX_EPISODES = 2000
+MAX_EPISODES = 1100
 
 q_table = build_q_table(N_STATES, ACTIONS)
 
@@ -159,7 +159,7 @@ for episode in range(MAX_EPISODES):
     right_qtable[episode, :] = q_table['right'].values
 
 # In[2]:
-ax, fig = axes(rows = 1, columns=2)
+ax, fig = axes(fig_number=1, rows = 1, columns=2)
 
 colors = ['b', 'g', 'r', 'purple', 'k']
 
@@ -180,6 +180,8 @@ ax[1].set_xlabel('Training Episode')
 ax[2].set_xlabel('Training Episode')
 
 fig.tight_layout()
+
+fig.savefig('TreasureHunt/QTable_Left_Right.png', format='png', dpi=300, bbox_inches = "tight")
 
 
 # In[3]:
@@ -266,9 +268,15 @@ fig.text(x=0.5, y=0.97, s='Q Table A', ha = 'center', fontsize=20, fontweight='b
 ax[1].set_title('Left')
 ax[2].set_title('Right')
 
-fig.text(x=0.5, y=0.49, s='Q Table B', ha = 'center', fontsize=20, fontweight='bold')
+fig.text(x=0.5, y=0.505, s='Q Table B', ha = 'center', fontsize=20, fontweight='bold')
 ax[3].set_title('Left')
 ax[4].set_title('Right')
+
+ax[1].set_xticklabels([])
+ax[2].set_xticklabels([])
+
+ax[2].set_yticklabels([])
+ax[4].set_yticklabels([])
 
 ax[1].set_ylabel('Value')
 ax[3].set_ylabel('Value')
@@ -276,3 +284,5 @@ ax[3].set_xlabel('Training Episode')
 ax[4].set_xlabel('Training Episode')
 
 fig.tight_layout()
+
+fig.savefig('TreasureHunt/DoubleQTable_Left_Right.png', format='png', dpi=300, bbox_inches = "tight")
