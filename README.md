@@ -149,7 +149,15 @@ This conclusion is qualitative and was drawn from investigating several games of
  2. Play a move to threaten a win: make a two in a row and force opponent to block, **BUT** don't set yourself up that your opponent's blocking move, forces you to make a defensive move - again defensive moves are wasted moves because they significantly decrease one's chance of winning (stay on offense).
 
 ### Tabular-Q Strategy
+Using a slightly simpler game: There are 6 states, at each state the agent can move left or right. The agent starts at State 1, and the agent wins the game upon reaching State 6 (where the treasure lies). State 6 has a reward of 1, while all other states have no reward. Going left at State 1, just returns the agent to State 1. 
 
+| State 1 | State 2 | State 3 | State 4 | State 5 | State 6 |
+-------------------------------------------------------------
+| 0       | 0       | 0       | 0       | 0       | 1       |
+
+![TreasureHunt_LiftRight](TreasureHunt/QTable_Left_Right.png)
+
+![TreasureHunt_DoubleQ](TreasureHunt/DoubleQTable_Left_Right.png)
 
 Hypothesis: when training the Q-Table against a mini-max player the maximum value for any move should be <0, because playing against a minimax player will at best produce a tie.
 But when trained against a random player, some of the values can be greater than 0, because a random player will leave open the chance for winning. 
