@@ -159,13 +159,13 @@ for episode in range(MAX_EPISODES):
     right_qtable[episode, :] = q_table['right'].values
 
 # In[2]:
-ax, fig = axes(fig_number=1, rows = 1, columns=2)
+ax, fig = axes(fig_number=1, rows=1, columns=2, row_height=4, column_width=6*4/5)
 
 colors = ['b', 'g', 'r', 'purple', 'k']
 
 for state in range(5):
     ax[1].plot(left_qtable[:,state], 'o', color=colors[state])
-    ax[2].plot(right_qtable[:,state], 'o', color=colors[state])
+    ax[2].plot(right_qtable[:,state], 'o', color=colors[state], label = 'State {}'.format(state + 1))
 
 ax[1].set_ylim(ax[2].get_ylim())
 ax[2].set_xlim(-5, 205)
@@ -178,6 +178,11 @@ ax[2].set_title('Right')
 ax[1].set_ylabel('Value')
 ax[1].set_xlabel('Training Episode')
 ax[2].set_xlabel('Training Episode')
+
+handles, labels = ax[2].get_legend_handles_labels()
+order = [4,3,2,1,0]
+ax[2].legend([handles[idx] for idx in order],[labels[idx] for idx in order], fontsize=14)
+ax[2].set_yticklabels([])
 
 fig.tight_layout()
 
@@ -246,14 +251,14 @@ for episode in range(MAX_EPISODES):
 
 # In[4]:
 
-ax, fig = axes(rows = 2, columns=2)
+ax, fig = axes(rows = 2, columns=2, row_height=4, column_width=6*4/5)
 
 for state in range(5):
     ax[1].plot(left_qtable_A[:,state], 'o', color=colors[state])
-    ax[2].plot(right_qtable_A[:,state], 'o', color=colors[state])
+    ax[2].plot(right_qtable_A[:,state], 'o', color=colors[state], label = 'State {}'.format(state + 1))
 
     ax[3].plot(left_qtable_B[:,state], 'o', color=colors[state])
-    ax[4].plot(right_qtable_B[:,state], 'o', color=colors[state])
+    ax[4].plot(right_qtable_B[:,state], 'o', color=colors[state], label = 'State {}'.format(state + 1))
 
 ax[1].set_ylim(ax[2].get_ylim())
 ax[2].set_xlim(-10, 250)
@@ -282,6 +287,11 @@ ax[1].set_ylabel('Value')
 ax[3].set_ylabel('Value')
 ax[3].set_xlabel('Training Episode')
 ax[4].set_xlabel('Training Episode')
+
+handles, labels = ax[2].get_legend_handles_labels()
+order = [4,3,2,1,0]
+ax[2].legend([handles[idx] for idx in order],[labels[idx] for idx in order], fontsize=14)
+ax[4].legend([handles[idx] for idx in order],[labels[idx] for idx in order], fontsize=14)
 
 fig.tight_layout()
 
