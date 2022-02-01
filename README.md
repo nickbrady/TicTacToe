@@ -149,15 +149,21 @@ This conclusion is qualitative and was drawn from investigating several games of
  2. Play a move to threaten a win: make a two in a row and force opponent to block, **BUT** don't set yourself up that your opponent's blocking move, forces you to make a defensive move - again defensive moves are wasted moves because they significantly decrease one's chance of winning (stay on offense).
 
 ### Tabular-Q Strategy
+#### "Treasure Hunt"
 Using a slightly simpler game: There are 6 states, at each state the agent can move left or right. The agent starts at State 1, and the agent wins the game upon reaching State 6 (where the treasure lies). State 6 has a reward of 1, while all other states have no reward. Going left at State 1, just returns the agent to State 1. 
 
 | State 1 | State 2 | State 3 | State 4 | State 5 | State 6 |
--------------------------------------------------------------
+|--------:|--------:|--------:|--------:|--------:|--------:|
 | 0       | 0       | 0       | 0       | 0       | 1       |
+
+The two images that follow show the evolution of the QTable values as more training games are played. First what we notice is that after about 100 training games, the q-values for a movement to the right plateau and reach a steady-state; the same occurs for a movement to the left, but it just much longer. The difference in the number of training games to reach steady-state is mainly a function of the epsilon value: an epsilon value of 0 will lead to the values in "left" and "right" plateauing at the same time, and smaller epsilon values will lead to plateaus that occur at more similar times. 
+
+The second thing to notice is that at steady-state, the values of moving to the right are always higher than the values of moving to the left (ratio is .9^2). This is exactly what we expect - if the "treasure" is always on the right, always go right. The first figure shows the the q-values when using a single q-table; the second figure shows the evolution of the q-values when using Double Q-Learning. What we can see is that single and double Q-learning produce the same steady-state values, however double Q-learning seems to take twice as long to reach the plateau. 
 
 ![TreasureHunt_LiftRight](TreasureHunt/QTable_Left_Right.png)
 
 ![TreasureHunt_DoubleQ](TreasureHunt/DoubleQTable_Left_Right.png)
 
+#### Tic-Tac-Toe
 Hypothesis: when training the Q-Table against a mini-max player the maximum value for any move should be <0, because playing against a minimax player will at best produce a tie.
 But when trained against a random player, some of the values can be greater than 0, because a random player will leave open the chance for winning. 
