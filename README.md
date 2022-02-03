@@ -121,7 +121,8 @@ Using the analytical results we can visualize the positions that are most freque
 From this image we can deduce that the middle square is played frequently by the winner and played infrequently by the loser - i.e. the middle square is likely the most valuable square. This makes sense from our intuition as well because of the 8 possible winning orientations, 4 of them (50%) involve the middle square. The results also indicate that the corner squares are the second most valuable places (each corner square is involved in 3 winning orientations), where the edge middle squares are the least valuable (each only involved in 2 winning orientations). 
 
 Varying game strategies can be created to test this hypothesis about the relative values of each square (center > corners > edge middle). 
-![RandomStrategies](Images/VaryingStrategyResults.png)
+<img src="Images/VaryingStrategyResults.png" height="350">
+
 The results displayed above seem to corroborate our hypotheis about the relative values of each position. Strategies that favor taking the edge middle positions perform the worst, while strategies that favor the center position perform the best. This seems to hold whether playing first or playing second.
 
 ### MiniMax Strategy
@@ -160,9 +161,9 @@ The two images that follow show the evolution of the QTable values as more train
 
 The second thing to notice is that at steady-state, the values of moving to the right are always higher than the values of moving to the left (ratio is .9^2). This is exactly what we expect - if the "treasure" is always on the right, always go right. The first figure shows the the q-values when using a single q-table; the second figure shows the evolution of the q-values when using Double Q-Learning. What we can see is that single and double Q-learning produce the same steady-state values, however double Q-learning seems to take twice as long to reach the plateau. 
 
-![TreasureHunt_LiftRight](TreasureHunt/QTable_Left_Right.png)
+<img src="TreasureHunt/QTable_Left_Right.png" height="300">
 
-![TreasureHunt_DoubleQ](TreasureHunt/DoubleQTable_Left_Right.png)
+<img src="TreasureHunt/DoubleQTable_Left_Right.png" height="600">
 
 #### Tic-Tac-Toe
 I was having some difficulty understanding why Q-Learning was not performing as well as I would like - even after many training games, the Q-player was still losing a small percentage of the games which I thought did not make sense. And it appears to be due to the reward value. Originally the reward has been loss: -1; tie: 0; win: 1. Which makes sense intuitively: win > tie > loss. Because Q-Learning is still a bit of a black box to me, I started to go down some different rabbit holes to try and figure out why I wasn't getting the results I wanted / expected. I started looking at the games that the Q-player was losing (even after being trained). One such board of interest was:
@@ -171,6 +172,27 @@ I was having some difficulty understanding why Q-Learning was not performing as 
  [ -  O  -]  
  [ -  -  -]] 
 </pre>
+
+Let's look at an even simpler board position:
+<pre>
+[[ X  O  X]
+ [ -  O  -]
+ [ O  X  -]]
+</pre>
+
+It is X's turn to move and what we can see is that from this position it is impossible for O to win (i.e. X cannot lose), but if X chooses the left middle position, it is also impossible for X to win. By this logic, X should move to either of the other available positions and when playing against a random player, X has a 50% chance of winning and a 50% chance of tying - this is born out in results plot. When the reward for tying is 0 (R_tie=0) and for winning it is 1 (R_win=1), then we get the following results and q-values. 
+
+<img src="Images/QLearning_R_Zero.png" height="300">
+
+What we can see is that when the reward for a tie is zero, the expected value of taking position 3 remains constant at 0 - which is expect. If X takes that position, they have sealed their fate and can only tie. However, the variance for positions 5 and 8 are vary wide - with a minimum of 0 and a maximum of 1; this can also be expected as choosing either of these two positions gives a 50-50 chance of winning or tying. Although the variance is high, we can deduce that the expected value of either of these moves is 0.5. The instability of the q-values seems to be a cause for concern.
+
+<img src="Images/QLearning_50_50.png" height="300">
+
+If the reward for a tie is changed from zero to 1 (R_tie = 1) then the q-values become more stable and the Q-agent's choices become more consistent and reproducible. However, there is a chance that the Q-agent will follow a path of suboptimal play. If we intialize the value of position 5 and 8 as 1, then the same results as before are produced.
+
+<img src="Images/QLearning_100_PercentTies.png" height="300">
+
+But if the position value of position 3 is initialized at 1 instead, then the Q-agent with follow a game strategy that produces only ties. 
 
 
 
