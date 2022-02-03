@@ -167,8 +167,8 @@ The second thing to notice is that at steady-state, the values of moving to the 
 #### Tic-Tac-Toe
 I was having some difficulty understanding why Q-Learning was not performing as well as I would like - even after many training games, the Q-player was still losing a small percentage of the games which I thought did not make sense. And it appears to be due to the reward value. Originally the reward has been loss: -1; tie: 0; win: 1. Which makes sense intuitively: win > tie > loss. Because Q-Learning is still a bit of a black box to me, I started to go down some different rabbit holes to try and figure out why I wasn't getting the results I wanted / expected. I started looking at the games that the Q-player was losing (even after being trained). One such board of interest was:
 <pre>
-[[ X  0  X]  
- [ -  0  -]  
+[[ X  O  X]  
+ [ -  O  -]  
  [ -  -  -]] 
 </pre>
 
