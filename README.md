@@ -166,9 +166,20 @@ The second thing to notice is that at steady-state, the values of moving to the 
 <img src="TreasureHunt/DoubleQTable_Left_Right.png" height="600">
 
 #### Tic-Tac-Toe
-
 <pre>
 [[ X  O  X]  
  [ -  O  -]  
  [ -  -  -]] 
 </pre>
+
+<img src="Images/Q_Learning_Simple_Board_R_win_1__R_tie_0__R_loss_1.png" height="300">
+
+<img src="Images/Q_Learning_Simple_Board_R_win_1__R_tie_0__R_loss_2.png" height="300">
+
+Similar results obtained with DoubleQ-Learning.
+
+For the overall start board:
+
+<img src="Images/Q_Learning_Start_Board_R_win_1__R_tie_0__R_loss_1.png" height="300">
+
+<img src="Images/Q_Learning_Start_Board_R_win_1__R_tie_0__R_loss_2.png" height="300">
