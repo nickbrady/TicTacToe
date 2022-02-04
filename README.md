@@ -166,35 +166,9 @@ The second thing to notice is that at steady-state, the values of moving to the 
 <img src="TreasureHunt/DoubleQTable_Left_Right.png" height="600">
 
 #### Tic-Tac-Toe
-I was having some difficulty understanding why Q-Learning was not performing as well as I would like - even after many training games, the Q-player was still losing a small percentage of the games which I thought did not make sense. And it appears to be due to the reward value. Originally the reward has been loss: -1; tie: 0; win: 1. Which makes sense intuitively: win > tie > loss. Because Q-Learning is still a bit of a black box to me, I started to go down some different rabbit holes to try and figure out why I wasn't getting the results I wanted / expected. I started looking at the games that the Q-player was losing (even after being trained). One such board of interest was:
+
 <pre>
 [[ X  O  X]  
  [ -  O  -]  
  [ -  -  -]] 
 </pre>
-
-Let's look at an even simpler board position:
-<pre>
-[[ X  O  X]
- [ -  O  -]
- [ O  X  -]]
-</pre>
-
-It is X's turn to move and what we can see is that from this position it is impossible for O to win (i.e. X cannot lose), but if X chooses the left middle position, it is also impossible for X to win. By this logic, X should move to either of the other available positions and when playing against a random player, X has a 50% chance of winning and a 50% chance of tying - this is born out in results plot. When the reward for tying is 0 (R_tie=0) and for winning it is 1 (R_win=1), then we get the following results and q-values. 
-
-<img src="Images/QLearning_R_Zero.png" height="300">
-
-What we can see is that when the reward for a tie is zero, the expected value of taking position 3 remains constant at 0 - which is expect. If X takes that position, they have sealed their fate and can only tie. However, the variance for positions 5 and 8 are vary wide - with a minimum of 0 and a maximum of 1; this can also be expected as choosing either of these two positions gives a 50-50 chance of winning or tying. Although the variance is high, we can deduce that the expected value of either of these moves is 0.5. The instability of the q-values seems to be a cause for concern.
-
-<img src="Images/QLearning_50_50.png" height="300">
-
-If the reward for a tie is changed from zero to 1 (R_tie = 1) then the q-values become more stable and the Q-agent's choices become more consistent and reproducible. However, there is a chance that the Q-agent will follow a path of suboptimal play. If we intialize the value of position 5 and 8 as 1, then the same results as before are produced.
-
-<img src="Images/QLearning_100_PercentTies.png" height="300">
-
-But if the position value of position 3 is initialized at 1 instead, then the Q-agent with follow a game strategy that produces only ties. 
-
-
-
-Hypothesis: when training the Q-Table against a mini-max player the maximum value for any move should be <0, because playing against a minimax player will at best produce a tie.
-But when trained against a random player, some of the values can be greater than 0, because a random player will leave open the chance for winning. 
