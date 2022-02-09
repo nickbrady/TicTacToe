@@ -393,18 +393,6 @@ print(len([r for r in game_results if r == 1]))
 print(len([r for r in game_results if r == 0]))
 print(len([r for r in game_results if r == -1]))
 
-# In[4]:
-
-cache = BoardCache()
-board = Board()
-
-print(board.board_2d)
-
-print(get_position_value(board))
-
-print("Number or symmetry unique board positions: \n", len(cache.cache))
-cache_keys = list(cache.cache.keys())
-
 # In[5]:
 
 class q_table:
@@ -1338,24 +1326,6 @@ def Update_Qtable(qtable, board, move_ind, board_prime, R_win=1, R_tie=0, R_loss
 
 # In[20]:
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 qtable_X = deepcopy(initial_qtable)
 qtable_O = deepcopy(initial_qtable) # probably only need one
 
@@ -1367,12 +1337,12 @@ num_test_games = 100
 test_interval = 200
 
 update_X = True
-update_O = False
+update_O = True
 
-results = []
-results_random = []
-results_minimax = []
-results_qagent = []
+results_X_RANDOM = []
+results_O_RANDOM = []
+results_X_MINIMAX = []
+results_O_MINIMAX = []
 
 df_q_values_X = pd.DataFrame(columns=[x for x in range(9)], index=[x for x in range(number_games)])
 df_q_values_O_corner = pd.DataFrame(columns=[x for x in range(9)], index=[x for x in range(number_games)])
@@ -1381,6 +1351,7 @@ df_q_values_O_mid = pd.DataFrame(columns=[x for x in range(9)], index=[x for x i
 start_board = Board()
 
 for i in range(number_games):
+    print('\r{}'.format(i), end='')
     board = start_board
 
     while not board.is_gameover():
@@ -1419,20 +1390,8 @@ for i in range(number_games):
                 if update_O:
                     Update_Qtable(qtable_O, board_O, O_move, board)
 
-    # Play O Move
-        # rand_move = random.choice(board.get_valid_move_indexes())
-        # board = board.play_move(rand_move)
-
-
         board_O = copy(board)   # save this board for updating q-table
         board, O_move, trans_f = play_Q_move(board, qtable_O, EPSILON=0.9)
-        # (q_values_O, trans_f), found = qtable_O.get_for_position(board)
-        #
-        # max_index = np.where(q_values_O == max(q_values_O))[0]
-        # O_move  = random.choice(max_index)
-        #
-        # board = Board(trans_f.transform(board.board_2d).flatten())
-        # board = board.play_move(O_move)
 
         if board.is_gameover():
             if update_X:
@@ -1446,9 +1405,9 @@ for i in range(number_games):
             if update_X:
                 Update_Qtable(qtable_X, board_X, X_move, board)
 
-    if i % 100 == 0:
-        update_X = not(update_X)
-        update_O = not(update_O)
+    # if i % 1000 == 0:
+    #     update_X = not(update_X)
+    #     update_O = not(update_O)
 
 
 ##############################################################################################################
@@ -1465,46 +1424,76 @@ for i in range(number_games):
                 if board.is_gameover():
                     continue
                 else:                   # O move
-                    board = Board(trans_f.reverse(board.board_2d).flatten())
                     rand_move = random.choice(board.get_valid_move_indexes())
                     board = board.play_move(rand_move)
 
-                    # (q_values, trans_f), found = qtable_O.get_for_position(board)
-                    # max_index = np.where(q_values == max(q_values))[0]
-                    # move_ind  = random.choice(max_index)
-                    # board = Board(trans_f.transform(board.board_2d).flatten())
-                    # board = board.play_move(move_ind)
-                    #
-                    # if not board.is_gameover():
-                    #     board = Board(trans_f.reverse(board.board_2d).flatten())
+            results_X_RANDOM.append(board.get_game_result())
 
+        for j in range(num_test_games):
+            board = start_board
 
-            results.append(board.get_game_result())
+            while not board.is_gameover():
+                X_move = random.choice(board.get_valid_move_indexes())
+                board = board.play_move(X_move)
+
+                if not board.is_gameover():
+                    board, O_move, trans_f = play_Q_move(board, qtable_O, EPSILON=1.0)
+
+            results_O_RANDOM.append(board.get_game_result())
 # In[51]:
-ax, fig = axes(fig_number=1, rows=2, columns=2)
+ax, fig = axes(fig_number=1, rows=1, columns=2)
 
+ax_i = 1
+results = results_X_RANDOM
 for i in range(int(len(results) / num_test_games)):
     begin = i*num_test_games
     end = begin + num_test_games
     subresults = results[begin:end]
     x = i*test_interval
     if i == 0:
-        ax[1].plot(x, len([r for r in subresults if r == 1]) / len(subresults)*100, 'go', label = 'win')
-        ax[1].plot(x, len([r for r in subresults if r == 0]) / len(subresults)*100, 'ks', label = 'tie')
-        ax[1].plot(x, len([r for r in subresults if r == -1]) / len(subresults)*100, 'r^', label = 'loss')
+        ax[ax_i].plot(x, len([r for r in subresults if r == 1]) / len(subresults)*100, 'go', label = 'win')
+        ax[ax_i].plot(x, len([r for r in subresults if r == 0]) / len(subresults)*100, 'ks', label = 'tie')
+        ax[ax_i].plot(x, len([r for r in subresults if r == -1]) / len(subresults)*100, 'r^', label = 'loss')
     else:
-        ax[1].plot(x, len([r for r in subresults if r == 1]) / len(subresults)*100, 'go', label = '_nolegend_')
-        ax[1].plot(x, len([r for r in subresults if r == 0]) / len(subresults)*100, 'ks', label = '_nolegend_')
-        ax[1].plot(x, len([r for r in subresults if r == -1]) / len(subresults)*100, 'r^', label = '_nolegend_')
+        ax[ax_i].plot(x, len([r for r in subresults if r == 1]) / len(subresults)*100, 'go', label = '_nolegend_')
+        ax[ax_i].plot(x, len([r for r in subresults if r == 0]) / len(subresults)*100, 'ks', label = '_nolegend_')
+        ax[ax_i].plot(x, len([r for r in subresults if r == -1]) / len(subresults)*100, 'r^', label = '_nolegend_')
 
-# ax[1].set_ylim(-3, 80)
-ax[1].set_xlabel('Number of Training Games')
-ax[1].set_ylabel('Percentage of Test Game Results')
-ax[1].legend(ncol=3, loc='upper right', bbox_to_anchor=(0.95,0.95), fontsize=13)
+ax[ax_i].set_xlabel('Number of Training Games')
+ax[ax_i].set_ylabel('Percentage of Test Game Results')
+ax[ax_i].legend(ncol=3, loc='right', bbox_to_anchor=(0.95,0.5), fontsize=13)
+ax[ax_i].set_title('Player X vs Random')
+
+ax_i = 2
+results = results_O_RANDOM
+for i in range(int(len(results) / num_test_games)):
+    begin = i*num_test_games
+    end = begin + num_test_games
+    subresults = results[begin:end]
+    x = i*test_interval
+    if i == 0:
+        ax[ax_i].plot(x, len([r for r in subresults if r == 1]) / len(subresults)*100, 'go', label = 'win')
+        ax[ax_i].plot(x, len([r for r in subresults if r == 0]) / len(subresults)*100, 'ks', label = 'tie')
+        ax[ax_i].plot(x, len([r for r in subresults if r == -1]) / len(subresults)*100, 'r^', label = 'loss')
+    else:
+        ax[ax_i].plot(x, len([r for r in subresults if r == 1]) / len(subresults)*100, 'go', label = '_nolegend_')
+        ax[ax_i].plot(x, len([r for r in subresults if r == 0]) / len(subresults)*100, 'ks', label = '_nolegend_')
+        ax[ax_i].plot(x, len([r for r in subresults if r == -1]) / len(subresults)*100, 'r^', label = '_nolegend_')
+
+ax[ax_i].set_ylim(ax[1].get_ylim())
+ax[ax_i].set_xlabel('Number of Training Games')
+# ax[ax_i].set_ylabel('Percentage of Test Game Results')
+ax[ax_i].set_yticklabels([])
+ax[ax_i].legend(ncol=3, loc='right', bbox_to_anchor=(0.98,0.5), fontsize=13)
+ax[ax_i].set_title('Random vs Player O')
+
+fig.tight_layout()
+
+fig.savefig('Images/Q_vs_Q_Learning.png', format='png', dpi=300, bbox_inches = "tight")
 
 
 
-
+# In[100]:
 colors = ['blue', 'red', 'green', 'yellow', 'purple', 'orange', 'brown', 'black', 'grey']
 markers = ['o', 's', 'd', '^', '<', '>', 'x', '.', 'h']
 for key in df_q_values_X.keys():
@@ -1544,88 +1533,6 @@ ax[ax_i].set_ylabel('Q-Values X')
 ax[ax_i].set_xlabel('Number of Training Games')
 
 fig.tight_layout()
-
-# In[52]:
-# load qTable
-qtable = un_pickle_it('/Users/nicholasbrady/Documents/Post-Doc/TicTacToe/QLearningData/Q_Learning_Start_Board_R_win_1__R_tie_0__R_loss_10_Full_QTable')
-
-# In[53]:
-results_RANDOM = []
-
-num_test_games = 10000
-for j in range(num_test_games):
-    board = start_board
-
-    while not board.is_gameover():
-        board, move_ind, trans_f = play_Q_move(board, qtable, EPSILON=1.0)
-
-        if board.is_gameover():
-            continue
-        else:                   # O move
-            board = Board(trans_f.reverse(board.board_2d).flatten())
-            rand_move = random.choice(board.get_valid_move_indexes())
-            board = board.play_move(rand_move)
-
-    results_RANDOM.append(board.get_game_result())
-
-# In[54]:
-results_MINIMAX = []
-num_test_games = 10000
-for j in range(num_test_games):
-    board = start_board
-
-    while not board.is_gameover():
-        board, move_ind, trans_f = play_Q_move(board, qtable, EPSILON=1.0)
-
-        if board.is_gameover():
-            continue
-        else:                   # O move
-            board = Board(trans_f.reverse(board.board_2d).flatten())
-            minimax_move = mini_max_strategy(board)
-            board = board.play_move(minimax_move)
-
-    results_MINIMAX.append(board.get_game_result())
-
-# for j in range(num_test_games):
-#     board = start_board
-#
-#     while not board.is_gameover():
-#         board, move_ind, trans_f = play_Q_move(board, qtable, EPSILON=1.0)
-#
-#         if board.is_gameover():
-#             continue
-#         else:                   # O move
-#             board = Board(trans_f.reverse(board.board_2d).flatten())
-#             rand_move = random.choice(board.get_valid_move_indexes())
-#             board = board.play_move(rand_move)
-#
-#             # (q_values, trans_f), found = qtable_O.get_for_position(board)
-#             # max_index = np.where(q_values == max(q_values))[0]
-#             # move_ind  = random.choice(max_index)
-#             # board = Board(trans_f.transform(board.board_2d).flatten())
-#             # board = board.play_move(move_ind)
-#             #
-#             # if not board.is_gameover():
-#             #     board = Board(trans_f.reverse(board.board_2d).flatten())
-#
-#
-#     results_RANDOM.append(board.get_game_result())
-
-# In[54]:
-
-results = results_RANDOM
-print('versus RANDOM STRATEGY:')
-print('Win Rate: \t {:.1f}'.format(len([r for r in results if r == 1]) / len(results)*100))
-print('Loss Rate: \t {:.1f}'.format(len([r for r in results if r == -1]) / len(results)*100))
-print('Tie Rate: \t {:.1f}'.format(len([r for r in results if r == 0]) / len(results)*100))
-
-print()
-results = results_MINIMAX
-print('versus MINIMAX STRATEGY:')
-print('Win Rate: \t {:.1f}'.format(len([r for r in results if r == 1]) / len(results)*100))
-print('Loss Rate: \t {:.1f}'.format(len([r for r in results if r == -1]) / len(results)*100))
-print('Tie Rate: \t {:.1f}'.format(len([r for r in results if r == 0]) / len(results)*100))
-
 
 # In[55]:
 qtable1 = deepcopy(initial_qtable)
@@ -1806,7 +1713,6 @@ for j in range(num_test_games):
         if board.is_gameover():
             continue
         else:                   # O move
-            board = Board(trans_f.reverse(board.board_2d).flatten())
             rand_move = random.choice(board.get_valid_move_indexes())
             board = board.play_move(rand_move)
 
@@ -1824,7 +1730,6 @@ for j in range(num_test_games):
         if board.is_gameover():
             continue
         else:                   # O move
-            board = Board(trans_f.reverse(board.board_2d).flatten())
             minimax_move = mini_max_strategy(board)
             board = board.play_move(minimax_move)
 
@@ -1862,6 +1767,20 @@ for j in range(num_test_games):
     results_MINIMAX_O.append(board.get_game_result())
 
 # In[54]:
+results_Q_Agents = []
+num_test_games = 5000
+for j in range(num_test_games):
+    board = start_board
+
+    while not board.is_gameover():
+        board, O_move, trans_f = play_Q_move(board, qtable_X, EPSILON=1.0)
+
+        if not board.is_gameover():
+            board, O_move, trans_f = play_Q_move(board, qtable_O, EPSILON=1.0)
+
+    results_Q_Agents.append(board.get_game_result())
+
+# In[54]:
 
 results = results_RANDOM_X
 print('versus RANDOM STRATEGY_X:')
@@ -1876,6 +1795,7 @@ print('Win Rate: \t {:.1f}'.format(len([r for r in results if r == 1]) / len(res
 print('Loss Rate: \t {:.1f}'.format(len([r for r in results if r == -1]) / len(results)*100))
 print('Tie Rate: \t {:.1f}'.format(len([r for r in results if r == 0]) / len(results)*100))
 
+print()
 results = results_RANDOM_O
 print('versus RANDOM STRATEGY_O:')
 print('Win Rate: \t {:.1f}'.format(len([r for r in results if r == 1]) / len(results)*100))
@@ -1884,6 +1804,13 @@ print('Tie Rate: \t {:.1f}'.format(len([r for r in results if r == 0]) / len(res
 
 print()
 results = results_MINIMAX_O
+print('versus MINIMAX STRATEGY_O:')
+print('Win Rate: \t {:.1f}'.format(len([r for r in results if r == 1]) / len(results)*100))
+print('Loss Rate: \t {:.1f}'.format(len([r for r in results if r == -1]) / len(results)*100))
+print('Tie Rate: \t {:.1f}'.format(len([r for r in results if r == 0]) / len(results)*100))
+
+print()
+results = results_Q_Agents
 print('versus MINIMAX STRATEGY_O:')
 print('Win Rate: \t {:.1f}'.format(len([r for r in results if r == 1]) / len(results)*100))
 print('Loss Rate: \t {:.1f}'.format(len([r for r in results if r == -1]) / len(results)*100))
