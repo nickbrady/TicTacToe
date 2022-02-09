@@ -193,3 +193,7 @@ What we can see here is that slight changes in the feedback (reward values) resu
 | Q-Agent 1 |   [0.984, 0.0, 0.016] |     [0.0, 0.0, 1.0] |    [0.0, 0.0, 1.0] |
 
 What we can see from this table that summarizes different strategies that arise from different learning strategies is that Q-Learning outperforms the Minimax strategy. The downside to Q-Learning is that it requires a lot of training data, but the advantage of Q-Learning is that it is more flexible and is able to maximize wins while also minimizing losses. It is particularly advantageous for player 2, where the tie rate is cut in half and the win-rate is increased by about 10%. If we just focus on the rate of tying, the Q-Agent ties 50% less than the Minimax-Agent. 
+
+<img src="Images/Q_vs_Q_Learning.png" height="300">
+
+As can be seen from the plot above, two Q-Agents can play against each other to learn optimal play strategy. While here, they do not reach "optimal" play strategy we can see that they both learn. It is hypothesized that using Double Q-Learning might be more advantageous here; in addition, it might be useful to only update one player's strategy at a time instead of allowing both to vary and update simultaneously. 
