@@ -185,3 +185,9 @@ For the overall start board:
 <img src="Images/Q_Learning_Start_Board_R_win_1__R_tie_0__R_loss_2.png" height="300">
 
 What we can see here is that slight changes in the feedback (reward values) result in different play strategies. Most notable is that an increase in the magnitute of the loss penalty from -1 to -2 leads the Q-agent to preferentially select the middle square as the starting move. I
+
+|           |              Random 2 |           Minimax 2 |          Q-Agent 2 |
+|----------:|----------------------:|--------------------:|-------------------:|
+| Random 1  | [0.583, 0.298, 0.119] | [0.0, 0.769, 0.231] | [0.881, 0.0, 0.119 |
+| Minimax 1 |   [0.972, 0.0, 0.028] |     [0.0, 0.0, 1.0]	|    [0.0, 0.0, 1.0] |
+| Q-Agent 1 |   [0.984, 0.0, 0.016] |     [0.0, 0.0, 1.0] |          0         |
