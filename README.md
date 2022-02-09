@@ -190,6 +190,6 @@ What we can see here is that slight changes in the feedback (reward values) resu
 |----------:|----------------------:|--------------------:|-------------------:|
 | Random 1  | [0.583, 0.298, 0.119] | [0.0, 0.769, 0.231] | [0.0, 0.924, 0.076 |
 | Minimax 1 |   [0.972, 0.0, 0.028] |     [0.0, 0.0, 1.0]	|    [0.0, 0.0, 1.0] |
-| Q-Agent 1 |   [0.984, 0.0, 0.016] |     [0.0, 0.0, 1.0] |          0         |
+| Q-Agent 1 |   [0.984, 0.0, 0.016] |     [0.0, 0.0, 1.0] |    [0.0, 0.0, 1.0] |
 
 What we can see from this table that summarizes different strategies that arise from different learning strategies is that Q-Learning outperforms the Minimax strategy. The downside to Q-Learning is that it requires a lot of training data, but the advantage of Q-Learning is that it is more flexible and is able to maximize wins while also minimizing losses. It is particularly advantageous for player 2, where the tie rate is cut in half and the win-rate is increased by about 10%. If we just focus on the rate of tying, the Q-Agent ties 50% less than the Minimax-Agent. 
