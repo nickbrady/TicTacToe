@@ -744,7 +744,7 @@ def get_position_value(board):
     # check if the board position is already cached
     cached_position_value, found = cache.get_for_position(board)
     if found:
-        return cached_position_value
+        return cached_position_value[0]
 
     position_value = calculate_position_value(board)
 
@@ -832,8 +832,9 @@ cache = BoardCache()
 board = Board()
 print(board.board_2d)
 
-get_position_value(board)
+print(get_position_value(board))
 print(len(cache.cache))
+print(cache.get_for_position(board))
 
 # In[100]:
 game_results, game_moves = play_tic_tac_toe(player_1_strategy=mini_max_strategy, player_2_strategy=None, number_of_games=1)
@@ -1029,9 +1030,9 @@ print(board.board_2d)
         return move
 '''
 
-model = tf.keras.Sequential([
-    tf.keras.layers.Flatten(input_shape=(3, 3)),
-    tf.keras.layers.Dense(36, activation='relu'),
-    tf.keras.layers.Dense(36, activation='relu'),
-    tf.keras.layers.Dense(9)
-])
+# model = tf.keras.Sequential([
+#     tf.keras.layers.Flatten(input_shape=(3, 3)),
+#     tf.keras.layers.Dense(36, activation='relu'),
+#     tf.keras.layers.Dense(36, activation='relu'),
+#     tf.keras.layers.Dense(9)
+# ])
