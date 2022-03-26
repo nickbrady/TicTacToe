@@ -1,5 +1,4 @@
 # Tic-Tac-Toe
-Test Change
 Apply Machine Learning to simple game: Tic-Tac-Toe
 
 ## Introduction
@@ -122,6 +121,7 @@ From this image we can deduce that the middle square is played frequently by the
 
 Varying game strategies can be created to test this hypothesis about the relative values of each square (center > corners > edge middle).
 <img src="Images/VaryingStrategyResults.png" height="350">
+
 
 The results displayed above seem to corroborate our hypotheis about the relative values of each position. Strategies that favor taking the edge middle positions perform the worst, while strategies that favor the center position perform the best. This seems to hold whether playing first or playing second.
 
