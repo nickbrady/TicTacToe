@@ -1,5 +1,5 @@
 # Tic-Tac-Toe
-
+Test Change
 Apply Machine Learning to simple game: Tic-Tac-Toe
 
 ## Introduction
@@ -75,7 +75,7 @@ http://www.se16.info/hgb/tictactoe.htm
 The source code for analyzing and visualizing the results from different game strategies can be found in ```GameAnalysis.py```
 
 ### Random Move Choice
-Using ```play_tic_tac_toe``` a high number of random games (each player chooses moves random from a list of possible moves) can be played. From these games statistics can be generated to get a break down of the results. 
+Using ```play_tic_tac_toe``` a high number of random games (each player chooses moves random from a list of possible moves) can be played. From these games statistics can be generated to get a break down of the results.
 
 |              | (mean ± std. dev) |
 |--------------|:--------------:|
@@ -91,14 +91,14 @@ Using ```play_tic_tac_toe``` a high number of random games (each player chooses 
 
 The break down of ties, X wins, and O wins are in good agreement with the result from nestedsoftware.com. But I was more curious if these results made practical sense.
 
-Because the game is very simple it is possible to analytically solve the number of possible board permutations. Which can be found at http://www.se16.info/hgb/tictactoe.htm. Because the percentage of board orientation did not seem to align with the observed winning percentages from my random games, I decided to investigate further to see where the discrepency lay (if at all). 
+Because the game is very simple it is possible to analytically solve the number of possible board permutations. Which can be found at http://www.se16.info/hgb/tictactoe.htm. Because the percentage of board orientation did not seem to align with the observed winning percentages from my random games, I decided to investigate further to see where the discrepency lay (if at all).
 
 I wrote a recursive function ```board_state_moves_and_result``` to systematically record every possible board position. The results are tabulated below:
 |   5 Moves |   6 Moves |   7 Moves |   8 Moves |   9 Moves |   Ties |  Total Games |
 |----------:|----------:|----------:|----------:|----------:|-------:|-------------:|
 |      1440 |      5328 |     47952 |     72576 |     81792 |  46080 |        255168|
 
-Unsurprisingly, these results are identical to the results obtained from www.se16.info. Then using these results and some logical thinking, one can determine the expected number of games that will end at each move. 
+Unsurprisingly, these results are identical to the results obtained from www.se16.info. Then using these results and some logical thinking, one can determine the expected number of games that will end at each move.
 
 1. 9! / (9-5)! = 15120 is the number of game states after the 5th move
 2. 1440 game states are won on move 5 and therefore *DO NOT* proceed to the sixth move
@@ -118,9 +118,9 @@ The percentage of games that are won after each nth move can then calculated.
 Using the analytical results we can visualize the positions that are most frequently played for wins, losses, ties.
 ![PlayFrequency](Images/Tic-Tac-Toe_PlayFrequency.png)
 
-From this image we can deduce that the middle square is played frequently by the winner and played infrequently by the loser - i.e. the middle square is likely the most valuable square. This makes sense from our intuition as well because of the 8 possible winning orientations, 4 of them (50%) involve the middle square. The results also indicate that the corner squares are the second most valuable places (each corner square is involved in 3 winning orientations), where the edge middle squares are the least valuable (each only involved in 2 winning orientations). 
+From this image we can deduce that the middle square is played frequently by the winner and played infrequently by the loser - i.e. the middle square is likely the most valuable square. This makes sense from our intuition as well because of the 8 possible winning orientations, 4 of them (50%) involve the middle square. The results also indicate that the corner squares are the second most valuable places (each corner square is involved in 3 winning orientations), where the edge middle squares are the least valuable (each only involved in 2 winning orientations).
 
-Varying game strategies can be created to test this hypothesis about the relative values of each square (center > corners > edge middle). 
+Varying game strategies can be created to test this hypothesis about the relative values of each square (center > corners > edge middle).
 <img src="Images/VaryingStrategyResults.png" height="350">
 
 The results displayed above seem to corroborate our hypotheis about the relative values of each position. Strategies that favor taking the edge middle positions perform the worst, while strategies that favor the center position perform the best. This seems to hold whether playing first or playing second.
@@ -140,7 +140,7 @@ Player 1:
  [ 0  0 -1]]
 When in this situation, playing a the corner square commits to a tie, while playing one of the middle edge corners still leaves open the possibility for a win. This is why using the minimax strategy that prefers corners over middle edge squares performs slightly worse than a minimax strategy that only has a preference the center square.
 This conclusion is qualitative and was drawn from investigating several games of different minimax strategies vs a random player.
- 
+
  Player two:
  [[ 1  0  0]
  [ 0 -1  0]
@@ -151,15 +151,15 @@ This conclusion is qualitative and was drawn from investigating several games of
 
 ### Tabular-Q Strategy
 #### "Treasure Hunt"
-Using a slightly simpler game: There are 6 states, at each state the agent can move left or right. The agent starts at State 1, and the agent wins the game upon reaching State 6 (where the treasure lies). State 6 has a reward of 1, while all other states have no reward. Going left at State 1, just returns the agent to State 1. 
+Using a slightly simpler game: There are 6 states, at each state the agent can move left or right. The agent starts at State 1, and the agent wins the game upon reaching State 6 (where the treasure lies). State 6 has a reward of 1, while all other states have no reward. Going left at State 1, just returns the agent to State 1.
 
 | State 1 | State 2 | State 3 | State 4 | State 5 | State 6 |
 |--------:|--------:|--------:|--------:|--------:|--------:|
 | 0       | 0       | 0       | 0       | 0       | 1       |
 
-The two images that follow show the evolution of the QTable values as more training games are played. First what we notice is that after about 100 training games, the q-values for a movement to the right plateau and reach a steady-state; the same occurs for a movement to the left, but it just much longer. The difference in the number of training games to reach steady-state is mainly a function of the epsilon value: an epsilon value of 0 will lead to the values in "left" and "right" plateauing at the same time, and smaller epsilon values will lead to plateaus that occur at more similar times. 
+The two images that follow show the evolution of the QTable values as more training games are played. First what we notice is that after about 100 training games, the q-values for a movement to the right plateau and reach a steady-state; the same occurs for a movement to the left, but it just much longer. The difference in the number of training games to reach steady-state is mainly a function of the epsilon value: an epsilon value of 0 will lead to the values in "left" and "right" plateauing at the same time, and smaller epsilon values will lead to plateaus that occur at more similar times.
 
-The second thing to notice is that at steady-state, the values of moving to the right are always higher than the values of moving to the left (ratio is .9^2). This is exactly what we expect - if the "treasure" is always on the right, always go right. The first figure shows the the q-values when using a single q-table; the second figure shows the evolution of the q-values when using Double Q-Learning. What we can see is that single and double Q-learning produce the same steady-state values, however double Q-learning seems to take twice as long to reach the plateau. 
+The second thing to notice is that at steady-state, the values of moving to the right are always higher than the values of moving to the left (ratio is .9^2). This is exactly what we expect - if the "treasure" is always on the right, always go right. The first figure shows the the q-values when using a single q-table; the second figure shows the evolution of the q-values when using Double Q-Learning. What we can see is that single and double Q-learning produce the same steady-state values, however double Q-learning seems to take twice as long to reach the plateau.
 
 <img src="TreasureHunt/QTable_Left_Right.png" height="300">
 
@@ -169,7 +169,7 @@ The second thing to notice is that at steady-state, the values of moving to the 
 <pre>
 [[ X  O  X]  
  [ -  O  -]  
- [ -  -  -]] 
+ [ -  -  -]]
 </pre>
 
 <img src="Images/Q_Learning_Simple_Board_R_win_1__R_tie_0__R_loss_1.png" height="300">
@@ -192,8 +192,8 @@ What we can see here is that slight changes in the feedback (reward values) resu
 | Minimax 1 |   [0.972, 0.0, 0.028] |     [0.0, 0.0, 1.0]	|    [0.0, 0.0, 1.0] |
 | Q-Agent 1 |   [0.984, 0.0, 0.016] |     [0.0, 0.0, 1.0] |    [0.0, 0.0, 1.0] |
 
-What we can see from this table that summarizes different strategies that arise from different learning strategies is that Q-Learning outperforms the Minimax strategy. The downside to Q-Learning is that it requires a lot of training data, but the advantage of Q-Learning is that it is more flexible and is able to maximize wins while also minimizing losses. It is particularly advantageous for player 2, where the tie rate is cut in half and the win-rate is increased by about 10%. If we just focus on the rate of tying, the Q-Agent ties 50% less than the Minimax-Agent. 
+What we can see from this table that summarizes different strategies that arise from different learning strategies is that Q-Learning outperforms the Minimax strategy. The downside to Q-Learning is that it requires a lot of training data, but the advantage of Q-Learning is that it is more flexible and is able to maximize wins while also minimizing losses. It is particularly advantageous for player 2, where the tie rate is cut in half and the win-rate is increased by about 10%. If we just focus on the rate of tying, the Q-Agent ties 50% less than the Minimax-Agent.
 
 <img src="Images/Q_vs_Q_Learning.png" height="300">
 
-As can be seen from the plot above, two Q-Agents can play against each other to learn optimal play strategy. While here, they do not reach "optimal" play strategy we can see that they both learn. It is hypothesized that using Double Q-Learning might be more advantageous here; in addition, it might be useful to only update one player's strategy at a time instead of allowing both to vary and update simultaneously. 
+As can be seen from the plot above, two Q-Agents can play against each other to learn optimal play strategy. While here, they do not reach "optimal" play strategy we can see that they both learn. It is hypothesized that using Double Q-Learning might be more advantageous here; in addition, it might be useful to only update one player's strategy at a time instead of allowing both to vary and update simultaneously.
