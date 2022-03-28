@@ -140,6 +140,17 @@ class BoardCache:
                     found is a boolean of whether the board position already exists in the cache
                     if found == False:
                         return None, False
+
+            pseudo code: get_position_value(board)
+                Input: board
+                Output: board value
+            1. Get all possible board orientations (there are up to 8 unique orientations of each board.board_2d)
+            2. Look if any of these board orientations are cached
+                if True:
+                    a. if it is cached return the board value
+                if False:
+                    a. Do a full tree search to get the board value (uses the minimax search)
+                    b. Add the board and its value to the cache
         '''
         board_2d = board.board_2d
 
