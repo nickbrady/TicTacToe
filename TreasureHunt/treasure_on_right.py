@@ -1,9 +1,17 @@
 """
+<<<<<<< HEAD
 A simple example for Reinforcement Learning using table lookup Q-learning method.
 An agent "o" is on the left of a 1 dimensional world, the treasure is on the rightmost location.
 Run this program and to see how the agent will improve its strategy of finding the treasure.
 
 View more on my tutorial page: https://morvanzhou.github.io/tutorials/
+=======
+A simple example for Reinforcement Learning using the Q-learning method.
+An agent "o" is on the left of a 1 dimensional world, the treasure is on the rightmost location.
+Run this program and to see how the agent will improve its strategy of finding the treasure.
+
+View more on the tutorial page: https://morvanzhou.github.io/tutorials/
+>>>>>>> NewBranch
 """
 
 import numpy as np
@@ -171,7 +179,11 @@ ax[1].set_ylim(ax[2].get_ylim())
 ax[2].set_xlim(-5, 205)
 ax[1].set_xlim(-25, 1025)
 
+<<<<<<< HEAD
 fig.text(x=0.5, y=0.95, s='Q Table Values', ha = 'center', fontsize=20, fontweight='bold')
+=======
+fig.text(x=0.5, y=0.99, s='Q Table Values', ha = 'center', fontsize=20, fontweight='bold')
+>>>>>>> NewBranch
 ax[1].set_title('Left')
 ax[2].set_title('Right')
 
@@ -296,3 +308,77 @@ ax[4].legend([handles[idx] for idx in order],[labels[idx] for idx in order], fon
 fig.tight_layout()
 
 fig.savefig('TreasureHunt/DoubleQTable_Left_Right.png', format='png', dpi=300, bbox_inches = "tight")
+<<<<<<< HEAD
+=======
+
+# In[5]:
+'''
+    Inspired from a YouTube video: https://www.youtube.com/watch?v=SX08NT55YhA (~10:50), we investigate how the q-table evolves if instead of always starting the agent at the left-most state (S = 0), we start the agent at a random state, not including the right-most state (S = random.choice([0, 1, 2, 3, 4])).
+
+    The intuition was that starting the agent at random states was a good way to increase the exploration aspect of exploration vs exploitation. In the YouTube video, introducing the agent into random game states seemed to be a method to reduce overfitting and increase a more general approach to learning.
+
+    Because this particular toy game requires the agent to pass through every possible game state in its search for the treasure, there is (or seems to be) no benefit (and perhaps even a hinderance) to using random starting states. The envidence being the underdeveloped Q-values, relative to those produced when the starting state is always S = 0.
+'''
+
+MAX_EPISODES = 1100
+
+q_table = build_q_table(N_STATES, ACTIONS)
+states = [0, 1, 2, 3, 4] # can't start at the furthest right state
+
+left_qtable, right_qtable = [np.zeros((MAX_EPISODES, N_STATES)), np.zeros((MAX_EPISODES, N_STATES))]
+
+for episode in range(MAX_EPISODES):
+    step_counter = 0
+    S = random.choice(states)
+    is_terminated = False
+    update_env(S, episode, step_counter)
+    while not is_terminated:
+
+        A = choose_action(S, q_table)
+        S_, R = get_env_feedback(S, A)  # take action & get next state and reward
+        q_predict = q_table.loc[S, A]
+        if S_ != 'terminal':
+            q_target = R + GAMMA * q_table.iloc[S_, :].max()   # next state is not terminal
+        else:
+            q_target = R     # next state is terminal
+            is_terminated = True    # terminate this episode
+
+        q_table.loc[S, A] += ALPHA * (q_target - q_predict)  # update
+        S = S_  # move to next state
+
+        update_env(S, episode, step_counter+1)
+        step_counter += 1
+
+    left_qtable[episode, :] = q_table['left'].values
+    right_qtable[episode, :] = q_table['right'].values
+
+# In[6]:
+ax, fig = axes(fig_number=1, rows=1, columns=2, row_height=4, column_width=6*4/5)
+
+colors = ['b', 'g', 'r', 'purple', 'k']
+
+for state in range(5):
+    ax[1].plot(left_qtable[:,state], 'o', color=colors[state])
+    ax[2].plot(right_qtable[:,state], 'o', color=colors[state], label = 'State {}'.format(state + 1))
+
+ax[1].set_ylim(ax[2].get_ylim())
+ax[2].set_xlim(-5, 205)
+ax[1].set_xlim(-25, 1025)
+
+fig.text(x=0.5, y=0.99, s='Q Table Values', ha = 'center', fontsize=20, fontweight='bold')
+ax[1].set_title('Left')
+ax[2].set_title('Right')
+
+ax[1].set_ylabel('Value')
+ax[1].set_xlabel('Training Episode')
+ax[2].set_xlabel('Training Episode')
+
+handles, labels = ax[2].get_legend_handles_labels()
+order = [4,3,2,1,0]
+ax[2].legend([handles[idx] for idx in order],[labels[idx] for idx in order], fontsize=14)
+ax[2].set_yticklabels([])
+
+fig.tight_layout()
+
+# fig.savefig('TreasureHunt/QTable_Left_Right.png', format='png', dpi=300, bbox_inches = "tight")
+>>>>>>> NewBranch

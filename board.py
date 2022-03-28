@@ -1,6 +1,10 @@
 import numpy as np
 import itertools
+<<<<<<< HEAD
 from transform import Transform, Identity, Rotate90, Flip
+=======
+
+>>>>>>> NewBranch
 
 BOARD_SIZE = 3
 BOARD_DIMENSIONS = (BOARD_SIZE, BOARD_SIZE)
@@ -116,7 +120,11 @@ class Board:
 
 
 
+<<<<<<< HEAD
 
+=======
+from transform import Transform, Identity, Rotate90, Flip
+>>>>>>> NewBranch
 
 TRANSFORMATIONS = [ Identity(),
                     Rotate90(1),
@@ -134,6 +142,7 @@ class BoardCache:
                         #                          value= board position value (1, 0, -1)
 
     def get_for_position(self, board):
+<<<<<<< HEAD
             board_2d = board.board_2d
 
             orientations = self.get_symmetrical_board_orientations(board_2d)
@@ -160,15 +169,53 @@ class BoardCache:
     #     board_value = self.cache[board_orientations[0][0].tobytes()]
     #
     #     return board_value, True
+=======
+        '''
+            Input : board
+            Output : ((position value, transformation), found)
+                    found is a boolean of whether the board position already exists in the cache
+                    if found == False:
+                        return None, False
+
+            pseudo code: get_position_value(board)
+                Input: board
+                Output: board value
+            1. Get all possible board orientations (there are up to 8 unique orientations of each board.board_2d)
+            2. Look if any of these board orientations are cached
+                if True:
+                    a. if it is cached return the board value
+                if False:
+                    a. Do a full tree search to get the board value (uses the minimax search)
+                    b. Add the board and its value to the cache
+        '''
+        board_2d = board.board_2d
+
+        orientations = self.get_symmetrical_board_orientations(board_2d)
+
+        for b, t in orientations:   # return the value as well as the transformation (useful for qtable)
+            result = self.cache.get(b.tobytes())
+            if result is not None:
+                return (result, t), True
+
+        return None, False
+>>>>>>> NewBranch
 
     def set_for_position(self, board, position_value):
         self.cache[board.board_2d.tobytes()] = position_value
 
     def get_symmetrical_board_orientations(self, board_2d):
+<<<<<<< HEAD
+=======
+        '''
+            For a given board position, all symmetrical board positions are returned
+            symmetrical board positions can then be looked up in cache
+        '''
+>>>>>>> NewBranch
         return [(t.transform(board_2d), t) for t in TRANSFORMATIONS]
 
     def reset(self):
         self.cache = {}
+<<<<<<< HEAD
 
 
 
@@ -206,3 +253,5 @@ class BoardCache:
 #
 #     def reset(self):
 #         self.cache = {}
+=======
+>>>>>>> NewBranch
