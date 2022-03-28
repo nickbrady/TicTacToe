@@ -18,12 +18,7 @@ import random
 import math
 import itertools
 
-<<<<<<< HEAD
 from board import Board, BoardCache, CELL_O
-=======
-from board import Board, BoardCache
-from board import CELL_O
->>>>>>> NewBranch
 
 '''
     There are 9 game over conditions: 8 game won conditions, 1 board full (tie-game)
@@ -752,18 +747,11 @@ def get_position_value(board):
 
     position_value = calculate_position_value(board)
 
-<<<<<<< HEAD
-=======
     # cache the board position (if it isn't already cached)
->>>>>>> NewBranch
     cache.set_for_position(board, position_value)
 
     return position_value
 
-<<<<<<< HEAD
-
-=======
->>>>>>> NewBranch
 def calculate_position_value(board):
     # board is a class object
     if board.is_gameover():
@@ -785,10 +773,6 @@ def choose_min_or_max_for_comparison(board):
     turn = board.get_turn()
     return min if turn == CELL_O else max
 
-<<<<<<< HEAD
-
-=======
->>>>>>> NewBranch
 def get_move_value_pairs(board):
     valid_move_indexes = board.get_valid_move_indexes()
 
@@ -801,10 +785,6 @@ def get_move_value_pairs(board):
 
     return move_value_pairs
 
-<<<<<<< HEAD
-
-=======
->>>>>>> NewBranch
 def mini_max_strategy(board): # mini_max_strategy
     min_or_max = choose_min_or_max_for_comparison(board)
     move_value_pairs = get_move_value_pairs(board)
@@ -845,24 +825,15 @@ def mini_max_strategy_center_corners(board): # mini_max_strategy
 
     return chosen_move
 
-<<<<<<< HEAD
-
-=======
->>>>>>> NewBranch
 # In[99]:
 cache = BoardCache()
 
 board = Board()
 print(board.board_2d)
 
-<<<<<<< HEAD
-get_position_value(board)
-print(len(cache.cache))
-=======
 print(get_position_value(board))
 print(len(cache.cache))
 print(cache.get_for_position(board))
->>>>>>> NewBranch
 
 # In[100]:
 game_results, game_moves = play_tic_tac_toe(player_1_strategy=mini_max_strategy, player_2_strategy=None, number_of_games=1)
@@ -1050,100 +1021,6 @@ print(board.board_2d)
 
 # In[3000]:
 '''
-<<<<<<< HEAD
-    Q-Learning
-'''
-def get_position_value_qtable(board, cache):
-    # check if the board position is already cached
-    cached_position_value, found = cache.get_for_position(board)
-    # print(cached_position_value, found)
-
-    if found:
-        return cached_position_value#[0]
-
-    position_value = calculate_position_value(board, cache)
-    # print(position_value)
-
-    cache.set_for_position(board, position_value)
-
-    # No cached board detected, so no transformations linked to position_value
-    # return (position_value, None)
-    return position_value
-
-
-def calculate_position_value(board, cache):
-    # board is a class object
-    if board.is_gameover():
-        return board.get_game_result()
-
-    valid_move_indexes = board.get_valid_move_indexes()
-
-    values = [get_position_value_qtable(board.play_move(m), cache)
-              for m in valid_move_indexes]
-
-    min_or_max = choose_min_or_max_for_comparison(board)
-    position_value = min_or_max(values)
-
-    return position_value
-
-# initialize qtable with all possible unique (by symmetry) board positions
-qtable1 = BoardCache()
-board = Board()
-
-get_position_value_qtable(board, qtable1)
-
-for k in qtable1.cache.keys():
-    qtable1.cache[k] = np.zeros(9)
-
-
-# In[200]:
-keys = list(qtable1.cache.keys())
-
-qtable1.cache[keys[0]]
-
-
-def mini_max_strategy(board): # mini_max_strategy
-    min_or_max = choose_min_or_max_for_comparison(board)
-    move_value_pairs = get_move_value_pairs(board)
-    move, best_value = min_or_max(move_value_pairs, key=lambda m_v_p: m_v_p[1])
-
-    best_move_value_pairs = [m_v_p for m_v_p in move_value_pairs if m_v_p[1] == best_value]
-    chosen_move, _ = random.choice(best_move_value_pairs)
-
-    return chosen_move
-
-
-
-def Q_table_Strat(board):
-
-
-
-    return choose_move
-
-
-# In[400]:
-board = Board()
-
-board = board.play_move(6)
-print(board.board_2d)
-opponent_move = mini_max_strategy(board)
-board = board.play_move(opponent_move)
-print(board.board_2d)
-
-
-board = board.play_move(2)
-print(board.board_2d)
-opponent_move = mini_max_strategy(board)
-board = board.play_move(opponent_move)
-print(board.board_2d)
-
-board = board.play_move(0)
-print(board.board_2d)
-opponent_move = mini_max_strategy(board)
-board = board.play_move(opponent_move)
-
-print(board.board_2d)
-=======
     NEURAL NET TIME!!
     Finally! The neural network
 
@@ -1158,4 +1035,3 @@ print(board.board_2d)
 #     tf.keras.layers.Dense(36, activation='relu'),
 #     tf.keras.layers.Dense(9)
 # ])
->>>>>>> NewBranch

@@ -1,17 +1,9 @@
 """
-<<<<<<< HEAD
-A simple example for Reinforcement Learning using table lookup Q-learning method.
-An agent "o" is on the left of a 1 dimensional world, the treasure is on the rightmost location.
-Run this program and to see how the agent will improve its strategy of finding the treasure.
-
-View more on my tutorial page: https://morvanzhou.github.io/tutorials/
-=======
 A simple example for Reinforcement Learning using the Q-learning method.
 An agent "o" is on the left of a 1 dimensional world, the treasure is on the rightmost location.
 Run this program and to see how the agent will improve its strategy of finding the treasure.
 
 View more on the tutorial page: https://morvanzhou.github.io/tutorials/
->>>>>>> NewBranch
 """
 
 import numpy as np
@@ -179,11 +171,7 @@ ax[1].set_ylim(ax[2].get_ylim())
 ax[2].set_xlim(-5, 205)
 ax[1].set_xlim(-25, 1025)
 
-<<<<<<< HEAD
-fig.text(x=0.5, y=0.95, s='Q Table Values', ha = 'center', fontsize=20, fontweight='bold')
-=======
 fig.text(x=0.5, y=0.99, s='Q Table Values', ha = 'center', fontsize=20, fontweight='bold')
->>>>>>> NewBranch
 ax[1].set_title('Left')
 ax[2].set_title('Right')
 
@@ -308,8 +296,6 @@ ax[4].legend([handles[idx] for idx in order],[labels[idx] for idx in order], fon
 fig.tight_layout()
 
 fig.savefig('TreasureHunt/DoubleQTable_Left_Right.png', format='png', dpi=300, bbox_inches = "tight")
-<<<<<<< HEAD
-=======
 
 # In[5]:
 '''
@@ -381,4 +367,3 @@ ax[2].set_yticklabels([])
 fig.tight_layout()
 
 # fig.savefig('TreasureHunt/QTable_Left_Right.png', format='png', dpi=300, bbox_inches = "tight")
->>>>>>> NewBranch
