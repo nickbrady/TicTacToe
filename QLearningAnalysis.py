@@ -13,6 +13,8 @@ matplotlib.rc('xtick', top=True, bottom=True, direction='in')
 matplotlib.rc('ytick', left=True, right=True, direction='in')
 plt.rc("axes.spines", top=True, right=True)
 matplotlib.rc('axes', edgecolor='k')
+colors = ['blue', 'red', 'green', 'yellow', 'purple', 'orange', 'brown', 'black', 'grey']
+markers = ['o', 's', 'd', '^', '<', '>', 'x', '.', 'h']
 
 import random
 import math
@@ -204,6 +206,9 @@ def Q_Training(board, R_tie=0, R_win=1, R_loss=-1, record_q_vals=False):
 
 
 def Q_Testing(start_board):
+    '''
+        No exploration only exploitation during testing
+    '''
     for j in range(num_test_games):
         board = start_board
         while not board.is_gameover():
@@ -379,7 +384,9 @@ def Plot_DoubleQ_Results_Values():
 minimax_cache = BoardCache()
 print(minimax_cache.cache)
 board = Board()
+print(board.board_2d)
 get_position_value(board)
+print(len(minimax_cache.cache))
 
 # In[3]:
 '''
@@ -487,146 +494,112 @@ print(len(qtable1.cache))
         repeat cycle and plot results to visually detect the presence of a plateau, at which point training can stop
 '''
 
+
 # In[23]:
 
-qtable1 = deepcopy(initial_qtable)
-
-EPSILON = 0.7
+EPSILON = 0.9
 GAMMA = 0.9
 ALPHA = 0.1
 number_games = 20001
 num_test_games = 100
 
-df_q_values = pd.DataFrame(columns=[x for x in range(9)], index=[x for x in range(number_games)])
-start_board = Board()
+Rewards_Array = [(1,0,-1), (1,0,-2), (1,0,-10)]
 
-results = []
+for _ in Rewards_Array:
+    R_win, R_tie, R_loss = _
+    print(R_win, R_tie, R_loss)
 
-R_win, R_tie, R_loss = [1, 0, -10]
+    qtable1 = deepcopy(initial_qtable)
+    df_q_values = pd.DataFrame(columns=[x for x in range(9)], index=[x for x in range(number_games)])
+    start_board = Board()
+    results = []
 
-for i in range(number_games):
-    board = start_board
-    Q_Training(board, R_win=R_win, R_tie=R_tie, R_loss=R_loss, record_q_vals=True)
+    print(qtable1.get_for_position(start_board))
 
-    # every 100 training games do a set of test games
-    if i % 100 == 0:
-        Q_Testing( Board() )
+    for i in range(number_games):
+        board = start_board
+        Q_Training(board, R_win=R_win, R_tie=R_tie, R_loss=R_loss, record_q_vals=True)
+
+        # every 100 training games do a set of test games
+        if i % 100 == 0:
+            Q_Testing( Board() )
 
 
-filename = 'QLearningData/Q_Learning_Start_Board_R_win_{}__R_tie_{}__R_loss_{}_Results'.format(R_win, R_tie, abs(R_loss))
-pickle_it(filename, results)
+    filename = 'QLearningData/Q_Learning_Start_Board_R_win_{}__R_tie_{}__R_loss_{}_Results'.format(R_win, R_tie, abs(R_loss))
+    pickle_it(filename, results)
 
-filename = 'QLearningData/Q_Learning_Start_Board_R_win_{}__R_tie_{}__R_loss_{}_Q_values'.format(R_win, R_tie, abs(R_loss))
-pickle_it(filename, df_q_values)
+    filename = 'QLearningData/Q_Learning_Start_Board_R_win_{}__R_tie_{}__R_loss_{}_Q_values'.format(R_win, R_tie, abs(R_loss))
+    pickle_it(filename, df_q_values)
 
-filename = 'QLearningData/Q_Learning_Start_Board_R_win_{}__R_tie_{}__R_loss_{}_Full_QTable'.format(R_win, R_tie, abs(R_loss))
-pickle_it(filename, qtable1)
+    filename = 'QLearningData/Q_Learning_Start_Board_R_win_{}__R_tie_{}__R_loss_{}_Full_QTable'.format(R_win, R_tie, abs(R_loss))
+    pickle_it(filename, qtable1)
 
 # In[24]:
-filename = 'QLearningData/Q_Learning_Start_Board_R_win_{}__R_tie_{}__R_loss_{}_Results'.format(R_win, R_tie, abs(R_loss))
-results = un_pickle_it(filename)
+# Rewards_Array = [(1,0,-1), (1,0,-2), (1,0,-10)]
+ax, fig = axes(fig_number=1, rows=len(Rewards_Array), columns=2)
 
-filename = 'QLearningData/Q_Learning_Start_Board_R_win_{}__R_tie_{}__R_loss_{}_Q_values'.format(R_win, R_tie, abs(R_loss))
-df_q_values = un_pickle_it(filename)
+for o, _ in enumerate(Rewards_Array):
+    R_win, R_tie, R_loss = _
+    print(R_win, R_tie, R_loss)
 
-ax, fig = axes(fig_number=1, rows=1, columns=2)
+    filename = 'QLearningData/Q_Learning_Start_Board_R_win_{}__R_tie_{}__R_loss_{}_Results'.format(R_win, R_tie, abs(R_loss))
+    results = un_pickle_it(filename)
 
-for i in range(int(len(results) / num_test_games)):
-    begin = i*num_test_games
-    end = begin + num_test_games
-    subresults = results[begin:end]
+    filename = 'QLearningData/Q_Learning_Start_Board_R_win_{}__R_tie_{}__R_loss_{}_Q_values'.format(R_win, R_tie, abs(R_loss))
+    df_q_values = un_pickle_it(filename)
 
-    ax[1].plot(i*100, len([r for r in subresults if r == 1]) / len(subresults)*100, 'go')
-    ax[1].plot(i*100, len([r for r in subresults if r == 0]) / len(subresults)*100, 'ks')
-    ax[1].plot(i*100, len([r for r in subresults if r == -1]) / len(subresults)*100, 'r^')
+    ax_ = ax[1 + 2*o]
+    for i in range(int(len(results) / num_test_games)):
+        begin = i*num_test_games
+        end = begin + num_test_games
+        subresults = results[begin:end]
 
-ax[1].set_xlabel('Number of Training Games')
-ax[1].set_ylabel('Percentage of Test Game Results')
-ax[1].legend(['Win', 'Tie', 'Loss'], ncol=3, loc="right", bbox_to_anchor=(0.99,0.3), fontsize=13)
+        ax_.plot(i*100, len([r for r in subresults if r == 1]) / len(subresults)*100, 'go')
+        ax_.plot(i*100, len([r for r in subresults if r == 0]) / len(subresults)*100, 'ks')
+        ax_.plot(i*100, len([r for r in subresults if r == -1]) / len(subresults)*100, 'r^')
 
-for key in df_q_values.keys():
-    ax[2].plot(df_q_values[key], linestyle='None', marker=markers[key], color=colors[key], label=str(key))
+    ax_.set_xlabel('Number of Training Games')
+    ax_.set_ylabel('Percentage of Test Game Results')
+    ax_.legend(['Win', 'Tie', 'Loss'], ncol=3, loc="right", bbox_to_anchor=(0.99,0.3), fontsize=13)
+    ax_.set_title('R_win = {}; R_tie = {}; R_loss = {}'.format(R_win, R_tie, R_loss), fontsize=20, fontweight='bold')
 
-ax[2].set_xlabel('Number of Training Games')
-ax[2].set_ylabel('Q-Values')
+    ax_ = ax[2 + 2*o]
+    for key in df_q_values.keys():
+        ax_.plot(df_q_values[key], linestyle='None', marker=markers[key], color=colors[key], label=str(key))
 
-handles, labels = ax[2].get_legend_handles_labels()
-order = [0,3,6,1,4,7,2,5,8]
-ax[2].legend([handles[idx] for idx in order],[labels[idx] for idx in order],
-                ncol=3, loc="lower right", bbox_to_anchor=(0.99,0.08), fontsize=13)
+    ax_.set_xlabel('Number of Training Games')
+    ax_.set_ylabel('Q-Values')
+
+    handles, labels = ax[2].get_legend_handles_labels()
+    order = [0,3,6,1,4,7,2,5,8]
+    ax_.legend([handles[idx] for idx in order],[labels[idx] for idx in order],
+                    ncol=3, loc="lower right", bbox_to_anchor=(0.99,0.08), fontsize=13)
+
 
 fig.tight_layout()
-fig.text(x=0.5, y=0.98, s='R_win = {}; R_tie = {}; R_loss = {}'.format(R_win, R_tie, R_loss), ha = 'center', fontsize=20, fontweight='bold')
 fig.savefig('Images/Q_Learning_Start_Board_R_win_{}__R_tie_{}__R_loss_{}.png'.format(R_win, R_tie, abs(R_loss)), format='png', dpi=300, bbox_inches = "tight")
 
 
-# In[25]
-qtable1 = deepcopy(initial_qtable)
 
-EPSILON = 0.7
-GAMMA = 0.9
-ALPHA = 0.1
-number_games = 20001
-num_test_games = 100
-df_q_values = pd.DataFrame(columns=[x for x in range(9)], index=[x for x in range(number_games)])
+# In[27]:
+cache_keys = list(qtable1.cache.keys())
+X_turn_boards = []
+O_turn_boards = []
 
-results = []
-start_board = Board()
+for k in cache_keys:
+    b_ = np.frombuffer(k, dtype=Board().board_2d.dtype)
+    c = Board(b_)
+    if c.get_game_result() != 2:
+        continue
+    if c.get_turn() == 1:
+        X_turn_boards.append(k)
+    else:
+        O_turn_boards.append(k)
 
-R_win, R_tie, R_loss = [1, 0, -10]
+print(len(X_turn_boards))
+print(len(O_turn_boards))
 
-for i in range(number_games):
-    board = start_board
-    Q_Training(board, R_win=R_win, R_tie=R_tie, R_loss=R_loss, record_q_vals=True)
 
-    # every 100 training games do a set of test games
-    if i % 100 == 0:
-        Q_Testing( Board() )
-
-filename = 'QLearningData/Q_Learning_Start_Board_R_win_{}__R_tie_{}__R_loss_{}_Results'.format(R_win, R_tie, abs(R_loss))
-pickle_it(filename, results)
-
-filename = 'QLearningData/Q_Learning_Start_Board_R_win_{}__R_tie_{}__R_loss_{}_Q_values'.format(R_win, R_tie, abs(R_loss))
-pickle_it(filename, df_q_values)
-
-# In[24]:
-R_win, R_tie, R_loss = [1, 0, -10]
-
-filename = 'QLearningData/Q_Learning_Start_Board_R_win_{}__R_tie_{}__R_loss_{}_Results'.format(R_win, R_tie, abs(R_loss))
-results = un_pickle_it(filename)
-
-filename = 'QLearningData/Q_Learning_Start_Board_R_win_{}__R_tie_{}__R_loss_{}_Q_values'.format(R_win, R_tie, abs(R_loss))
-df_q_values = un_pickle_it(filename)
-
-ax, fig = axes(fig_number=1, rows=1, columns=2)
-
-for i in range(int(len(results) / num_test_games)):
-    begin = i*num_test_games
-    end = begin + num_test_games
-    subresults = results[begin:end]
-
-    ax[1].plot(i*100, len([r for r in subresults if r == 1]) / len(subresults)*100, 'go')
-    ax[1].plot(i*100, len([r for r in subresults if r == 0]) / len(subresults)*100, 'ks')
-    ax[1].plot(i*100, len([r for r in subresults if r == -1]) / len(subresults)*100, 'r^')
-
-ax[1].set_xlabel('Number of Training Games')
-ax[1].set_ylabel('Percentage of Test Game Results')
-ax[1].legend(['Win', 'Tie', 'Loss'], ncol=3, loc="right", bbox_to_anchor=(0.99,0.2), fontsize=13)
-
-for key in df_q_values.keys():
-    ax[2].plot(df_q_values[key], linestyle='None', marker=markers[key], color=colors[key], label=str(key))
-
-ax[2].set_xlabel('Number of Training Games')
-ax[2].set_ylabel('Q-Values')
-
-handles, labels = ax[2].get_legend_handles_labels()
-order = [0,3,6,1,4,7,2,5,8]
-ax[2].legend([handles[idx] for idx in order],[labels[idx] for idx in order],
-                ncol=3, loc="lower right", bbox_to_anchor=(0.99,0.07), fontsize=13)
-
-fig.tight_layout()
-fig.text(x=0.5, y=0.98, s='R_win = {}; R_tie = {}; R_loss = {}'.format(R_win, R_tie, R_loss), ha = 'center', fontsize=20, fontweight='bold')
-fig.savefig('Images/Q_Learning_Start_Board_R_win_{}__R_tie_{}__R_loss_{}.png'.format(R_win, R_tie, abs(R_loss)), format='png', dpi=300, bbox_inches = "tight")
 
 # In[28]:
 '''
@@ -654,18 +627,28 @@ fig.savefig('Images/Q_Learning_Start_Board_R_win_{}__R_tie_{}__R_loss_{}.png'.fo
 [[ 1 -1  1]
  [ 0 -1  0]
  [ 0  0  0]]
-[-0.3439             -0.271              -0.271
-  0.                 -0.19                0.
-  0.5048772746704796  0.                  0.0373670463519   ]
+[-0.9999 -0.9999 -0.9999
+ 0.10512 -0.9999 0.22451
+ 0.08954  0.3935 0.2923]
 
-Obviously this is problematic because not block the O's (-1's) will frequently lead to a loss, but let's see if by playing more games from this position, the q-table can be updated (or is it already saturated).
+Obviously this is problematic because not blocking the O's (-1's) will frequently lead to a loss, but let's see if by playing more games from this position, the q-table can be updated (or is it already saturated).
 
-Actually, it should be obviously that this table is underdeveloped because playing invalid positions should produce the result of -1, but it is not, which means this table is not saturated
+Actually, it should be obvious that this table is underdeveloped because playing invalid positions should produce the result of -1, but it is not, which means this table is not saturated
 
 It could be that against a random player, it is better not to block
 '''
 
 # In[27]:
+'''
+    Simple Board (Not the typical starting board)
+
+    [[ X  O  X]
+     [ -  O  -]
+     [ -  -  -]]
+
+X to play...
+'''
+
 qtable1 = deepcopy(initial_qtable)
 
 EPSILON = 0.9
@@ -675,9 +658,6 @@ number_games = 10001
 num_test_games = 100
 test_interval = 100
 
-df_q_values = pd.DataFrame(columns=[x for x in range(9)], index=[x for x in range(number_games)])
-
-results = []
 
 board = Board()
 board = board.play_move(0)
@@ -686,73 +666,84 @@ board = board.play_move(2)
 board = board.play_move(1)
 start_board = board
 
-R_win, R_tie, R_loss = [1, 0, -1]
+Rewards_Array = [(1,0,-1), (1,0,-10)]
 
-for i in range(number_games):
-    board = start_board
-    Q_Training(board, R_win=R_win, R_tie=R_tie, R_loss=R_loss, record_q_vals=True)
+for _ in Rewards_Array:
+    R_win, R_tie, R_loss = _
 
-    # every 100 training games do a set of test games
-    if i % test_interval == 0:
-        Q_Testing(start_board)
+    df_q_values = pd.DataFrame(columns=[x for x in range(9)], index=[x for x in range(number_games)])
 
-filename = 'QLearningData/Q_Learning_Simple_Board_R_win_{}__R_tie_{}__R_loss_{}_Results'.format(R_win, R_tie, abs(R_loss))
-pickle_it(filename, results)
+    results = []
 
-filename = 'QLearningData/Q_Learning_Simple_Board_R_win_{}__R_tie_{}__R_loss_{}_Q_values'.format(R_win, R_tie, abs(R_loss))
-pickle_it(filename, df_q_values)
+    for i in range(number_games):
+        board = start_board
+        Q_Training(board, R_win=R_win, R_tie=R_tie, R_loss=R_loss, record_q_vals=True)
+
+        # every 100 training games do a set of test games
+        if i % test_interval == 0:
+            Q_Testing(start_board)
+
+    filename = 'QLearningData/Q_Learning_Simple_Board_R_win_{}__R_tie_{}__R_loss_{}_Results'.format(R_win, R_tie, abs(R_loss))
+    pickle_it(filename, results)
+
+    filename = 'QLearningData/Q_Learning_Simple_Board_R_win_{}__R_tie_{}__R_loss_{}_Q_values'.format(R_win, R_tie, abs(R_loss))
+    pickle_it(filename, df_q_values)
 
 # In[28]:
-R_win, R_tie, R_loss = [1, 0, -2]
 
-filename = 'QLearningData/Q_Learning_Simple_Board_R_win_{}__R_tie_{}__R_loss_{}_Results'.format(R_win, R_tie, abs(R_loss))
-results = un_pickle_it(filename)
+ax, fig = axes(fig_number=1, rows=len(Rewards_Array), columns=2)
 
-filename = 'QLearningData/Q_Learning_Simple_Board_R_win_{}__R_tie_{}__R_loss_{}_Q_values'.format(R_win, R_tie, abs(R_loss))
-df_q_values = un_pickle_it(filename)
+for o, _ in enumerate(Rewards_Array):
+    R_win, R_tie, R_loss = _
 
+    filename = 'QLearningData/Q_Learning_Simple_Board_R_win_{}__R_tie_{}__R_loss_{}_Results'.format(R_win, R_tie, abs(R_loss))
+    results = un_pickle_it(filename)
 
-ax, fig = axes(fig_number=1, rows=1, columns=2)
+    filename = 'QLearningData/Q_Learning_Simple_Board_R_win_{}__R_tie_{}__R_loss_{}_Q_values'.format(R_win, R_tie, abs(R_loss))
+    df_q_values = un_pickle_it(filename)
 
-for i in range(int(len(results) / num_test_games)):
-    begin = i*num_test_games
-    end = begin + num_test_games
-    subresults = results[begin:end]
-    x = i*test_interval
+    for i in range(int(len(results) / num_test_games)):
+        begin = i*num_test_games
+        end = begin + num_test_games
+        subresults = results[begin:end]
+        x = i*test_interval
 
-    if i == 0:
-        ax[1].plot(x, len([r for r in subresults if r == 1]) / len(subresults)*100, 'go', label = 'win')
-        ax[1].plot(x, len([r for r in subresults if r == 0]) / len(subresults)*100, 'ks', label = 'tie')
-        ax[1].plot(x, len([r for r in subresults if r == -1]) / len(subresults)*100, 'r^', label = 'loss')
-    else:
-        ax[1].plot(x, len([r for r in subresults if r == 1]) / len(subresults)*100, 'go', label = '_nolegend_')
-        ax[1].plot(x, len([r for r in subresults if r == 0]) / len(subresults)*100, 'ks', label = '_nolegend_')
-        ax[1].plot(x, len([r for r in subresults if r == -1]) / len(subresults)*100, 'r^', label = '_nolegend_')
+        ax_ = ax[1 + 2*o]
+        if i == 0:
+            ax_.plot(x, len([r for r in subresults if r == 1]) / len(subresults)*100, 'go', label = 'win')
+            ax_.plot(x, len([r for r in subresults if r == 0]) / len(subresults)*100, 'ks', label = 'tie')
+            ax_.plot(x, len([r for r in subresults if r == -1]) / len(subresults)*100, 'r^', label = 'loss')
+        else:
+            ax_.plot(x, len([r for r in subresults if r == 1]) / len(subresults)*100, 'go', label = '_nolegend_')
+            ax_.plot(x, len([r for r in subresults if r == 0]) / len(subresults)*100, 'ks', label = '_nolegend_')
+            ax_.plot(x, len([r for r in subresults if r == -1]) / len(subresults)*100, 'r^', label = '_nolegend_')
 
-ax[1].set_xlabel('Number of Training Games')
-ax[1].set_ylabel('Percentage of Test Game Results')
-ax[1].legend(ncol=3, loc='upper right', bbox_to_anchor=(0.95,0.95), fontsize=13)
-
-
-
-colors = ['blue', 'red', 'green', 'yellow', 'purple', 'orange', 'brown', 'black', 'grey']
-markers = ['o', 's', 'd', '^', '<', '>', 'x', '.', 'h']
-for key in df_q_values.keys():
-    ax[2].plot(df_q_values[key], linestyle='None', marker=markers[key], color=colors[key], label=str(key))
+    ax_.set_ylim([-5, 105])
+    ax_.set_xlabel('Number of Training Games')
+    ax_.set_ylabel('Percentage of Test Game Results')
+    ax_.legend(ncol=3, loc='upper right', bbox_to_anchor=(0.95,0.95), fontsize=13)
+    ax_.set_title('R_win = {}; R_tie = {}; R_loss = {}'.format(R_win, R_tie, R_loss), fontsize=20, fontweight='bold')
 
 
-ax[2].set_xlabel('Number of Training Games')
-ax[2].set_ylabel('Q-Values')
-# ax[2].set_ylim([-1.05, 1.05])
+    ax_ = ax[2 + 2*o]
+    print(df_q_values.iloc[-1].values)
+    for key in df_q_values.keys():
+        ax_.plot(df_q_values[key], linestyle='None', marker=markers[key], color=colors[key], label=str(key))
 
-handles, labels = ax[2].get_legend_handles_labels()
-order = [0,3,6,1,4,7,2,5,8]
-ax[2].legend([handles[idx] for idx in order],[labels[idx] for idx in order],
-                ncol=3, loc="upper right", bbox_to_anchor=(0.95,0.5), fontsize=13)
+
+    ax_.set_xlabel('Number of Training Games')
+    ax_.set_ylabel('Q-Values')
+    # ax[2].set_ylim([-1.05, 1.05])
+
+    handles, labels = ax[2].get_legend_handles_labels()
+    order = [0,3,6,1,4,7,2,5,8]
+    ax_.legend([handles[idx] for idx in order],[labels[idx] for idx in order],
+                    ncol=3, loc="upper right", bbox_to_anchor=(0.95,0.5), fontsize=13)
 
 fig.tight_layout()
-fig.text(x=0.5, y=0.98, s='R_win = {}; R_tie = {}; R_loss = {}'.format(R_win, R_tie, R_loss), ha = 'center', fontsize=20, fontweight='bold')
 fig.savefig('Images/Q_Learning_Simple_Board_R_win_{}__R_tie_{}__R_loss_{}.png'.format(R_win, R_tie, abs(R_loss)), format='png', dpi=300, bbox_inches = "tight")
+
+
 
 
 # In[100]:
@@ -765,7 +756,7 @@ qtableB = deepcopy(initial_qtable)
 EPSILON = 0.9
 GAMMA = 0.9
 ALPHA = 0.1
-number_games = 15001
+number_games = 100#15001
 test_interval = 100 # every 200 training games, run a test
 num_test_games = 100
 
@@ -781,7 +772,7 @@ board = board.play_move(2)
 board = board.play_move(1)
 start_board = board
 
-R_win, R_tie, R_loss = [1, 0, -2]
+# R_win, R_tie, R_loss = [1, 0, -2]
 
 for i in range(number_games):
     board = start_board
@@ -801,7 +792,6 @@ filename = 'QLearningData/DoubleQ_Learning_Simple_Board_R_win_{}__R_tie_{}__R_lo
 pickle_it(filename, df_q_values_B)
 
 # In[101]:
-R_win, R_tie, R_loss = [1, 0, -1]
 filename = 'QLearningData/DoubleQ_Learning_Simple_Board_R_win_{}__R_tie_{}__R_loss_{}_Results'.format(R_win, R_tie, abs(R_loss))
 results_doubleQ = un_pickle_it(filename)
 
@@ -828,7 +818,7 @@ qtableB = deepcopy(initial_qtable)
 EPSILON = 0.9
 GAMMA = 0.9
 ALPHA = 0.1
-number_games = 10001
+number_games = 100#10001
 test_interval = 100 # every 200 training games, run a test
 num_test_games = 100
 
@@ -871,7 +861,7 @@ qtableB = deepcopy(initial_qtable)
 EPSILON = 0.9
 GAMMA = 0.9
 ALPHA = 0.1
-number_games = 20001
+number_games = 100#20001
 test_interval = 100 # every 200 training games, run a test
 num_test_games = 100
 
@@ -883,9 +873,9 @@ df_q_values_B = pd.DataFrame(columns=[x for x in range(9)], index=[x for x in ra
 board = Board()
 start_board = board
 
-R_win, R_tie, R_loss = [1, 0, -1]
+# R_win, R_tie, R_loss = [1, 0, -1]
 
-for _ in [[1, 0, -2]]:
+for _ in [[1, 0, -1]]:
     R_win, R_tie, R_loss = _
     qtableA = deepcopy(initial_qtable)
     qtableB = deepcopy(initial_qtable)
@@ -908,7 +898,7 @@ for _ in [[1, 0, -2]]:
     pickle_it(filename, df_q_values_B)
 
 # In[101]:
-R_win, R_tie, R_loss = [1, 0, -10]
+# R_win, R_tie, R_loss = [1, 0, -10]
 filename = 'QLearningData/DoubleQ_Learning_Start_Board_R_win_{}__R_tie_{}__R_loss_{}_Results'.format(R_win, R_tie, abs(R_loss))
 results_doubleQ = un_pickle_it(filename)
 
@@ -951,7 +941,7 @@ print(len(qtable1.cache))
 EPSILON = 0.9
 GAMMA = 0.9
 ALPHA = 0.1
-number_games = 10001
+number_games = 100#10001
 num_test_games = 500
 
 results = []
@@ -1332,7 +1322,7 @@ qtable_O = deepcopy(initial_qtable) # probably only need one
 EPSILON = 0.9
 GAMMA = 0.9
 ALPHA = 0.1
-number_games = 30001
+number_games = 100#30001
 num_test_games = 100
 test_interval = 200
 
@@ -1494,45 +1484,46 @@ fig.savefig('Images/Q_vs_Q_Learning.png', format='png', dpi=300, bbox_inches = "
 
 
 # In[100]:
-colors = ['blue', 'red', 'green', 'yellow', 'purple', 'orange', 'brown', 'black', 'grey']
-markers = ['o', 's', 'd', '^', '<', '>', 'x', '.', 'h']
-for key in df_q_values_X.keys():
-    ax[2].plot(df_q_values_X[key], linestyle='None', marker=markers[key], color=colors[key], label=str(key))
 
-handles, labels = ax[2].get_legend_handles_labels()
-order = [0,3,6,1,4,7,2,5,8]
-ax[2].legend([handles[idx] for idx in order],[labels[idx] for idx in order],
-                ncol=3, loc="lower right", bbox_to_anchor=(0.98,0.02), fontsize=13)
-
-ax[2].set_ylabel('Q-Values X')
-ax[2].set_xlabel('Number of Training Games')
-
-
-ax_i = 3
-for key in df_q_values_X.keys():
-    ax[ax_i].plot(df_q_values_O_corner[key], linestyle='None', marker=markers[key], color=colors[key], label=str(key))
-
-handles, labels = ax[ax_i].get_legend_handles_labels()
-order = [0,3,6,1,4,7,2,5,8]
-ax[ax_i].legend([handles[idx] for idx in order],[labels[idx] for idx in order],
-                ncol=3, loc="lower right", bbox_to_anchor=(0.98,0.02), fontsize=13)
-
-ax[ax_i].set_ylabel('Q-Values X')
-ax[ax_i].set_xlabel('Number of Training Games')
-
-ax_i = 4
-for key in df_q_values_X.keys():
-    ax[ax_i].plot(df_q_values_O_edge[key], linestyle='None', marker=markers[key], color=colors[key], label=str(key))
-
-handles, labels = ax[ax_i].get_legend_handles_labels()
-order = [0,3,6,1,4,7,2,5,8]
-ax[ax_i].legend([handles[idx] for idx in order],[labels[idx] for idx in order],
-                ncol=3, loc="lower right", bbox_to_anchor=(0.98,0.02), fontsize=13)
-
-ax[ax_i].set_ylabel('Q-Values X')
-ax[ax_i].set_xlabel('Number of Training Games')
-
-fig.tight_layout()
+# print(len(ax))
+#
+# for key in df_q_values_X.keys():
+#     ax[2].plot(df_q_values_X[key], linestyle='None', marker=markers[key], color=colors[key], label=str(key))
+#
+# handles, labels = ax[2].get_legend_handles_labels()
+# order = [0,3,6,1,4,7,2,5,8]
+# ax[2].legend([handles[idx] for idx in order],[labels[idx] for idx in order],
+#                 ncol=3, loc="lower right", bbox_to_anchor=(0.98,0.02), fontsize=13)
+#
+# ax[2].set_ylabel('Q-Values X')
+# ax[2].set_xlabel('Number of Training Games')
+#
+#
+# ax_i = 3
+# for key in df_q_values_X.keys():
+#     ax[ax_i].plot(df_q_values_O_corner[key], linestyle='None', marker=markers[key], color=colors[key], label=str(key))
+#
+# handles, labels = ax[ax_i].get_legend_handles_labels()
+# order = [0,3,6,1,4,7,2,5,8]
+# ax[ax_i].legend([handles[idx] for idx in order],[labels[idx] for idx in order],
+#                 ncol=3, loc="lower right", bbox_to_anchor=(0.98,0.02), fontsize=13)
+#
+# ax[ax_i].set_ylabel('Q-Values X')
+# ax[ax_i].set_xlabel('Number of Training Games')
+#
+# ax_i = 4
+# for key in df_q_values_X.keys():
+#     ax[ax_i].plot(df_q_values_O_edge[key], linestyle='None', marker=markers[key], color=colors[key], label=str(key))
+#
+# handles, labels = ax[ax_i].get_legend_handles_labels()
+# order = [0,3,6,1,4,7,2,5,8]
+# ax[ax_i].legend([handles[idx] for idx in order],[labels[idx] for idx in order],
+#                 ncol=3, loc="lower right", bbox_to_anchor=(0.98,0.02), fontsize=13)
+#
+# ax[ax_i].set_ylabel('Q-Values X')
+# ax[ax_i].set_xlabel('Number of Training Games')
+#
+# fig.tight_layout()
 
 # In[55]:
 qtable1 = deepcopy(initial_qtable)
@@ -1540,7 +1531,7 @@ qtable1 = deepcopy(initial_qtable)
 EPSILON = 0.9
 GAMMA = 0.9
 ALPHA = 0.1
-number_games = 30001
+number_games = 100#30001
 num_test_games = 100
 
 df_q_values_X = pd.DataFrame(columns=[x for x in range(9)], index=[x for x in range(number_games)])
@@ -1550,7 +1541,7 @@ df_q_values_O_mid = pd.DataFrame(columns=[x for x in range(9)], index=[x for x i
 
 start_board = Board()
 
-R_win, R_tie, R_loss = [1, 0, -5]
+# R_win, R_tie, R_loss = [1, 0, -5]
 
 results = []
 
@@ -1645,11 +1636,6 @@ ax[1].set_ylabel('Percentage of Test Game Results')
 ax[1].legend(ncol=3, loc='right', bbox_to_anchor=(0.95,0.5), fontsize=13)
 
 
-
-
-colors = ['blue', 'red', 'green', 'yellow', 'purple', 'orange', 'brown', 'black', 'grey']
-markers = ['o', 's', 'd', '^', '<', '>', 'x', '.', 'h']
-
 ax_i = 2
 for key in df_q_values_O_mid.keys():
     ax[ax_i].plot(df_q_values_O_mid[key], linestyle='None', marker=markers[key], color=colors[key], label=str(key))
@@ -1692,7 +1678,7 @@ ax[ax_i].set_title('X Moves to Edge')
 
 fig.tight_layout()
 # In[100]:
-R_win, R_tie, R_loss = [1, 0, -10]
+# R_win, R_tie, R_loss = [1, 0, -10]
 
 filename = 'QLearningData/Q_Learning_Player2_R_win_{}__R_tie_{}__R_loss_{}_Full_QTable'.format(R_win, R_tie, abs(R_loss))
 qtable_O = un_pickle_it(filename)
@@ -1701,117 +1687,84 @@ filename = 'QLearningData/Q_Learning_Start_Board_R_win_{}__R_tie_{}__R_loss_{}_F
 qtable_X = un_pickle_it(filename)
 
 # In[53]:
-results_RANDOM_X = []
+'''
+    Test Q-Agent Strategy against different opponent strategies
+'''
 
-num_test_games = 5000
-for j in range(num_test_games):
-    board = start_board
+def q_agent_play_games(num_test_games=50, opponent = 'O', opponent_strategy=None):
+    '''
+        Available Opponent Strategies:
+        Random
+        Minimax
+        Q-Agent
+    '''
+    if opponent_strategy == None:
+        opponent_strategy = 'Random'
 
-    while not board.is_gameover():
-        board, move_ind, trans_f = play_Q_move(board, qtable_X, EPSILON=1.0)
+    results = []
 
-        if board.is_gameover():
-            continue
-        else:                   # O move
-            rand_move = random.choice(board.get_valid_move_indexes())
-            board = board.play_move(rand_move)
+    for j in range(num_test_games):
+        board = start_board
 
-    results_RANDOM_X.append(board.get_game_result())
+        while not board.is_gameover():
+            # X Move
+            if opponent == 'O':
+                board, move_ind, trans_f = play_Q_move(board, qtable_X, EPSILON=1.0)
+            else:
+                if opponent_strategy == 'Random':
+                    opponent_move = random.choice(board.get_valid_move_indexes())
+                    board = board.play_move(opponent_move)
+                elif opponent_strategy == 'Minimax':
+                    opponent_move = mini_max_strategy(board)
+                    board = board.play_move(opponent_move)
+                elif opponent_strategy == 'Q-Agent':
+                    board, move_ind, trans_f = play_Q_move(board, qtable_X, EPSILON=1.0)
 
-# In[54]:
-results_MINIMAX_X = []
-num_test_games = 5000
-for j in range(num_test_games):
-    board = start_board
 
-    while not board.is_gameover():
-        board, move_ind, trans_f = play_Q_move(board, qtable_X, EPSILON=1.0)
+            if board.is_gameover():
+                continue
 
-        if board.is_gameover():
-            continue
-        else:                   # O move
-            minimax_move = mini_max_strategy(board)
-            board = board.play_move(minimax_move)
+            # O Move
+            else:
+                if opponent == 'O':
+                    if opponent_strategy == 'Random':
+                        opponent_move = random.choice(board.get_valid_move_indexes())
+                        board = board.play_move(opponent_move)
+                    elif opponent_strategy == 'Minimax':
+                        opponent_move = mini_max_strategy(board)
+                        board = board.play_move(opponent_move)
+                    elif opponent_strategy == 'Q-Agent':
+                        board, move_ind, trans_f = play_Q_move(board, qtable_X, EPSILON=1.0)
+                else:
+                    board, move_ind, trans_f = play_Q_move(board, qtable_O, EPSILON=1.0)
 
-    results_MINIMAX_X.append(board.get_game_result())
 
-# In[101]:
-results_RANDOM_O = []
+        results.append(board.get_game_result())
 
-num_test_games = 5000
-for j in range(num_test_games):
-    board = start_board
+    return results
 
-    while not board.is_gameover():
-        X_move = random.choice(board.get_valid_move_indexes())
-        board = board.play_move(X_move)
-
-        if not board.is_gameover():
-            board, O_move, trans_f = play_Q_move(board, qtable_O, EPSILON=1.0)
-
-    results_RANDOM_O.append(board.get_game_result())
-
-# In[54]:
-results_MINIMAX_O = []
-num_test_games = 5000
-for j in range(num_test_games):
-    board = start_board
-
-    while not board.is_gameover():
-        minimax_move = mini_max_strategy(board)
-        board = board.play_move(minimax_move)
-
-        if not board.is_gameover():
-            board, O_move, trans_f = play_Q_move(board, qtable_O, EPSILON=1.0)
-
-    results_MINIMAX_O.append(board.get_game_result())
+test = q_agent_play_games(num_test_games=50, opponent='X', opponent_strategy='Q-Agent')
+print(test)
 
 # In[54]:
-results_Q_Agents = []
-num_test_games = 5000
-for j in range(num_test_games):
-    board = start_board
+opponent_player = ['O', 'X']
+opponent_strategy = ['Random', 'Minimax', 'Q-Agent']
+number_games = 50
 
-    while not board.is_gameover():
-        board, O_move, trans_f = play_Q_move(board, qtable_X, EPSILON=1.0)
+for opp_player in opponent_player:
+    for opp_strat in opponent_strategy:
+        results = q_agent_play_games(num_test_games=number_games, opponent=opp_player, opponent_strategy=opp_strat)
 
-        if not board.is_gameover():
-            board, O_move, trans_f = play_Q_move(board, qtable_O, EPSILON=1.0)
+        if opp_player == 'O':
+            Q_agent = 'X'
+            r_win = 1
+        elif opp_player == 'X':
+            Q_agent = 'O'
+            r_win = -1
 
-    results_Q_Agents.append(board.get_game_result())
 
-# In[54]:
-
-results = results_RANDOM_X
-print('versus RANDOM STRATEGY_X:')
-print('Win Rate: \t {:.1f}'.format(len([r for r in results if r == 1]) / len(results)*100))
-print('Loss Rate: \t {:.1f}'.format(len([r for r in results if r == -1]) / len(results)*100))
-print('Tie Rate: \t {:.1f}'.format(len([r for r in results if r == 0]) / len(results)*100))
-
-print()
-results = results_MINIMAX_X
-print('versus MINIMAX STRATEGY_X:')
-print('Win Rate: \t {:.1f}'.format(len([r for r in results if r == 1]) / len(results)*100))
-print('Loss Rate: \t {:.1f}'.format(len([r for r in results if r == -1]) / len(results)*100))
-print('Tie Rate: \t {:.1f}'.format(len([r for r in results if r == 0]) / len(results)*100))
-
-print()
-results = results_RANDOM_O
-print('versus RANDOM STRATEGY_O:')
-print('Win Rate: \t {:.1f}'.format(len([r for r in results if r == 1]) / len(results)*100))
-print('Loss Rate: \t {:.1f}'.format(len([r for r in results if r == -1]) / len(results)*100))
-print('Tie Rate: \t {:.1f}'.format(len([r for r in results if r == 0]) / len(results)*100))
-
-print()
-results = results_MINIMAX_O
-print('versus MINIMAX STRATEGY_O:')
-print('Win Rate: \t {:.1f}'.format(len([r for r in results if r == 1]) / len(results)*100))
-print('Loss Rate: \t {:.1f}'.format(len([r for r in results if r == -1]) / len(results)*100))
-print('Tie Rate: \t {:.1f}'.format(len([r for r in results if r == 0]) / len(results)*100))
-
-print()
-results = results_Q_Agents
-print('versus MINIMAX STRATEGY_O:')
-print('Win Rate: \t {:.1f}'.format(len([r for r in results if r == 1]) / len(results)*100))
-print('Loss Rate: \t {:.1f}'.format(len([r for r in results if r == -1]) / len(results)*100))
-print('Tie Rate: \t {:.1f}'.format(len([r for r in results if r == 0]) / len(results)*100))
+        print('Q_Agent ({}) versus {} ({}):'.format(Q_agent, opp_strat, opp_player))
+        print('Win Rate: \t {:.1f}'.format(len([r for r in results if r == r_win]) / len(results)*100))
+        print('Loss Rate: \t {:.1f}'.format(len([r for r in results if r == -r_win]) / len(results)*100))
+        print('Tie Rate: \t {:.1f}'.format(len([r for r in results if r == 0]) / len(results)*100))
+        print()
